@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>لوحة التحكم — THE OP</title>
+<script src="./config.js"></script>
+<style>
+  :root{
+    --bg:#050c12; --panel:#0b1620; --line:rgba(0,229,255,.18);
+    --cyan:#00e5ff; --text:#dcf1f8; --dim:#7fa3b3;
+    --green:#28e0a0; --red:#ff5c7a; --amber:#ffb648;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+    font-family:system-ui,'Segoe UI',Tahoma,sans-serif;font-size:14px}
+  header{display:flex;gap:12px;align-items:center;flex-wrap:wrap;
+    padding:14px 18px;border-bottom:1px solid var(--line);
+    background:rgba(8,14,20,.94);position:sticky;top:0;z-index:20}
+  h1{margin:0;font-size:17px;color:var(--cyan)}
+  main{padding:18px;max-width:1300px;margin:0 auto}
+  button{cursor:pointer;font:inherit;border-radius:8px;padding:7px 13px;
+    background:transparent;color:#9fd6e6;border:1px solid rgba(0,229,255,.35)}
+  button.primary{background:linear-gradient(90deg,#00e5ff,#0091ea);color:#04121a;border:0;font-weight:700}
+  button.danger{border-color:rgba(255,92,122,.5);color:#ffa9b8}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+  .tabs button[aria-selected="true"]{background:rgba(0,229,255,.12);border-color:var(--cyan);color:var(--cyan)}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:12px;margin-bottom:22px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}
+  .card .label{font-size:12px;color:var(--dim)}
+  .card .value{font-size:22px;font-weight:700;margin-top:6px;color:var(--cyan)}
+  .card.warn .value{color:var(--amber)}
+  .card.good .value{color:var(--green)}
+  section{background:var(--panel);border:1px solid var(--line);
+    border-radius:14px;padding:16px;margin-bottom:18px}
+  section h2{margin:0 0 12px;font-size:15px;color:var(--cyan)}
+  .scroll{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:13px;white-space:nowrap}
+  th,td{padding:9px 10px;text-align:right;border-bottom:1px solid rgba(0,229,255,.10)}
+  th{color:var(--dim);font-weight:600;font-size:12px}
+  tbody tr:hover{background:rgba(0,229,255,.04)}
+  code{direction:ltr;display:inline-block;font-size:12px}
+  .num{direction:ltr;text-align:left;font-variant-numeric:tabular-nums}
+  .pill{padding:2px 8px;border-radius:99px;font-size:11.5px;border:1px solid}
+  .pill.long{color:var(--green);border-color:rgba(40,224,160,.4)}
+  .pill.short{color:var(--red);border-color:rgba(255,92,122,.4)}
+  .pill.wait{color:var(--amber);border-color:rgba(255,182,72,.4)}
+  .pill.none{color:var(--dim);border-color:rgba(127,163,179,.35)}
+  .bars{display:flex;align-items:flex-end;gap:3px;height:90px;margin-top:8px}
+  .bars div{flex:1;background:linear-gradient(180deg,var(--cyan),rgba(0,229,255,.25));
+    border-radius:3px 3px 0 0;min-height:2px}
+  .muted{color:var(--dim);font-size:12.5px}
+  .gate{max-width:420px;margin:16vh auto;text-align:center}
+  input,textarea{width:100%;padding:9px;border-radius:8px;border:1px solid var(--line);
+    background:#07131b;color:var(--text);font:inherit}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+  label{font-size:12.5px;color:var(--dim)}
+  @media(max-width:640px){.row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div id="gate" class="gate">
+  <h1>لوحة التحكم</h1>
+  <p class="muted" id="gateMsg">جارِ التحقق…</p>
+  <p><button class="primary" onclick="location.href='./index.html'">رجوع للتطبيق</button></p>
+</div>
+
+<div id="app" hidden>
+  <header>
+    <h1>لوحة التحكم</h1>
+    <span class="muted" id="who"></span>
+    <span style="margin-inline-start:auto"></span>
+    <button onclick="loadAll()">تحديث</button>
+    <button onclick="location.href='./index.html'">التطبيق</button>
+  </header>
+  <main>
+    <div class="cards" id="kpis"></div>
+    <div class="tabs" id="tabs"></div>
+    <div id="panel"></div>
+  </main>
+</div>
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+const cfg = window.APP_CONFIG;
+const supabase = createClient(cfg.SUPABASE_URL, cfg.SUPABASE_PUBLISHABLE_KEY);
+
+const $ = (id) => document.getElementById(id);
+const money = (n) => `$${Number(n ?? 0).toFixed(Math.abs(Number(n ?? 0)) < 1 ? 4 : 2)}`;
+const num = (n) => Number(n ?? 0).toLocaleString('en-US');
+const when = (t) => (t ? new Date(t).toLocaleString('ar', { dateStyle: 'short', timeStyle: 'short' }) : '—');
+const esc = (s) => String(s ?? '').replace(/[<>&"]/g, (c) => (
+  { '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' }[c]));
+
+let state = {};
+let tab = 'overview';
+
+const TABS = [
+  ['overview', 'نظرة عامة'],
+  ['payments', 'طلبات الدفع'],
+  ['users', 'المشتركون'],
+  ['analyses', 'التحاليل'],
+  ['plans', 'الباقات'],
+  ['methods', 'طرق الدفع'],
+];
+
+/* The gate needs BOTH a Supabase session and profiles.is_admin — the flag is
+   only settable in the database, never through the API. */
+(async function boot() {
+  const { data } = await supabase.auth.getSession();
+  window.__authToken = data.session?.access_token ?? null;
+
+  if (!window.__authToken) {
+    $('gateMsg').textContent = 'سجّل دخولك من التطبيق أولاً.';
+    return;
+  }
+  const res = await window.apiFetch('/api/me');
+  const me = res.ok ? await res.json() : null;
+
+  if (!me?.profile?.is_admin) {
+    $('gateMsg').textContent = 'هذا الحساب مش مشرف.';
+    return;
+  }
+  $('gate').hidden = true;
+  $('app').hidden = false;
+  $('who').textContent = me.profile.email;
+  renderTabs();
+  loadAll();
+}());
+
+function renderTabs() {
+  $('tabs').innerHTML = TABS.map(([id, label]) =>
+    `<button data-tab="${id}" aria-selected="${id === tab}">${label}</button>`).join('');
+  $('tabs').onclick = (ev) => {
+    const t = ev.target.closest('button')?.dataset.tab;
+    if (!t) return;
+    tab = t;
+    renderTabs();
+    renderPanel();
+  };
+}
+
+async function get(path) {
+  const r = await window.apiFetch(path);
+  if (!r.ok) throw new Error((await r.json().catch(() => ({}))).message || `فشل ${path}`);
+  return r.json();
+}
+
+async function post(path, body) {
+  const r = await window.apiFetch(path, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!r.ok) throw new Error((await r.json().catch(() => ({}))).message || 'فشل الطلب');
+  return r.json();
+}
+
+window.loadAll = async function loadAll() {
+  try {
+    const [o, users, analyses, payments, plans, methods] = await Promise.all([
+      get('/api/admin/overview'),
+      get('/api/admin/users'),
+      get('/api/admin/analyses?limit=60'),
+      get('/api/admin/payment-requests?status=pending'),
+      get('/api/admin/plans'),
+      get('/api/admin/payment-methods'),
+    ]);
+    state = { ...o, ...users, ...analyses, ...payments, ...plans, ...methods };
+    renderKpis();
+    renderPanel();
+  } catch (err) {
+    $('panel').innerHTML = `<section><p class="muted">${esc(err.message)}</p></section>`;
+  }
+};
+
+function renderKpis() {
+  const o = state.overview || {};
+  const net = Number(o.revenue_month_usd ?? 0) - Number(o.cost_month_usd ?? 0);
+  const cards = [
+    ['صرف اليوم', money(o.cost_today_usd), 'warn'],
+    ['صرف الشهر', money(o.cost_month_usd), 'warn'],
+    ['توكينز اليوم', num(o.tokens_today), ''],
+    ['توكينز الشهر', num(o.tokens_month), ''],
+    ['دخل الشهر', money(o.revenue_month_usd), 'good'],
+    ['صافي الشهر', money(net), net >= 0 ? 'good' : 'warn'],
+    ['تحاليل اليوم', num(o.analyses_today), ''],
+    ['تحاليل الشهر', num(o.analyses_month), ''],
+    ['مشتركون فعّالون', num(o.users_active_subs), 'good'],
+    ['إجمالي المستخدمين', num(o.users_total), ''],
+    ['طلبات دفع معلّقة', num(o.pending_payments), o.pending_payments ? 'warn' : ''],
+    ['صرف كلي', money(o.cost_total_usd), 'warn'],
+  ];
+  $('kpis').innerHTML = cards.map(([label, value, cls]) =>
+    `<div class="card ${cls}"><div class="label">${label}</div><div class="value">${value}</div></div>`).join('');
+}
+
+function renderPanel() {
+  const p = $('panel');
+  p.onclick = null;
+  ({
+    overview: renderOverview,
+    payments: renderPayments,
+    users: renderUsers,
+    analyses: renderAnalyses,
+    plans: renderPlans,
+    methods: renderMethods,
+  })[tab](p);
+}
+
+function renderOverview(p) {
+  const daily = (state.daily || []).slice(0, 30).reverse();
+  const peak = Math.max(0.0001, ...daily.map((d) => Number(d.cost_usd || 0)));
+  p.innerHTML = `
+    <section>
+      <h2>الصرف اليومي (آخر ٣٠ يوم)</h2>
+      <div class="bars">${daily.map((d) => `<div style="height:${
+        Math.max(2, (Number(d.cost_usd || 0) / peak) * 100)}%"
+        title="${d.day} — ${money(d.cost_usd)} · ${num(d.total_tokens)} توكن"></div>`).join('')
+        || '<span class="muted">ما في بيانات بعد</span>'}</div>
+      <p class="muted">أعلى يوم: ${money(peak)}</p>
+    </section>
+
+    <section>
+      <h2>التكلفة حسب النموذج</h2>
+      <div class="scroll"><table>
+        <thead><tr><th>المزوّد</th><th>النموذج</th><th>المرحلة</th><th>نداءات</th>
+          <th>دخل</th><th>خرج</th><th>التكلفة</th><th>متوسط الزمن</th></tr></thead>
+        <tbody>${(state.models || []).map((m) => `<tr>
+          <td>${esc(m.provider)}</td><td><code>${esc(m.model)}</code></td><td>${esc(m.stage)}</td>
+          <td class="num">${num(m.calls)}</td><td class="num">${num(m.input_tokens)}</td>
+          <td class="num">${num(m.output_tokens)}</td><td class="num">${money(m.cost_usd)}</td>
+          <td class="num">${num(m.avg_latency_ms)}ms</td></tr>`).join('')
+          || '<tr><td colspan="8" class="muted">ما في بيانات بعد</td></tr>'}</tbody>
+      </table></div>
+    </section>
+
+    <section>
+      <h2>تفصيل يومي</h2>
+      <div class="scroll"><table>
+        <thead><tr><th>اليوم</th><th>تحاليل</th><th>مستخدمون</th>
+          <th>توكينز</th><th>التكلفة</th></tr></thead>
+        <tbody>${(state.daily || []).map((d) => `<tr>
+          <td class="num">${d.day}</td><td class="num">${num(d.analyses)}</td>
+          <td class="num">${num(d.active_users)}</td><td class="num">${num(d.total_tokens)}</td>
+          <td class="num">${money(d.cost_usd)}${d.has_unknown_cost ? ' *' : ''}</td></tr>`).join('')
+          || '<tr><td colspan="5" class="muted">ما في بيانات بعد</td></tr>'}</tbody>
+      </table></div>
+      <p class="muted">* اليوم فيه نداء لنموذج سعره غير مضبوط، فالتكلفة المعروضة أقل من الحقيقية.</p>
+    </section>`;
+}
+
+function renderPayments(p) {
+  const rows = state.requests || [];
+  p.innerHTML = `<section>
+    <h2>طلبات الدفع المعلّقة (${rows.length})</h2>
+    <p class="muted">الموافقة هي الإجراء الوحيد اللي بيفعّل اشتراك.</p>
+    <div class="scroll"><table>
+      <thead><tr><th>المستخدم</th><th>الباقة</th><th>المبلغ</th>
+        <th>المرجع</th><th>ملاحظة</th><th>التاريخ</th><th></th></tr></thead>
+      <tbody>${rows.map((r) => `<tr data-id="${r.id}">
+        <td>${esc(r.profiles?.email ?? r.user_id)}</td>
+        <td>${esc(r.plans?.name_ar ?? '')} <span class="muted">(${money(r.plans?.price_usd)})</span></td>
+        <td class="num">${money(r.amount_usd)}</td>
+        <td><code>${esc(r.reference)}</code></td>
+        <td>${esc(r.sender_note ?? '')}</td>
+        <td class="num">${when(r.created_at)}</td>
+        <td><button class="primary" data-act="approve">تفعيل</button>
+            <button class="danger" data-act="reject">رفض</button></td>
+      </tr>`).join('') || '<tr><td colspan="7" class="muted">ما في طلبات معلّقة</td></tr>'}</tbody>
+    </table></div>
+  </section>`;
+
+  p.onclick = async (ev) => {
+    const b = ev.target.closest('button[data-act]');
+    if (!b) return;
+    const act = b.dataset.act;
+    if (act === 'reject' && !confirm('رفض هذا الطلب؟')) return;
+    b.disabled = true;
+    try {
+      await post(`/api/admin/payment-requests/${act}`, { requestId: b.closest('tr').dataset.id });
+      await loadAll();
+    } catch (err) { alert(err.message); b.disabled = false; }
+  };
+}
+
+function renderUsers(p) {
+  p.innerHTML = `<section>
+    <h2>المشتركون — الدخل مقابل التكلفة</h2>
+    <div class="scroll"><table>
+      <thead><tr><th>البريد</th><th>الباقة</th><th>السعر</th><th>الحالة</th>
+        <th>تحاليل الفترة</th><th>كلي</th><th>تكلفة الفترة</th><th>الهامش</th>
+        <th>ينتهي</th><th>آخر تحليل</th><th></th></tr></thead>
+      <tbody>${(state.users || []).map((u) => `<tr data-id="${u.user_id}">
+        <td>${esc(u.email ?? '')}${u.is_blocked ? ' <span class="pill none">موقوف</span>' : ''}</td>
+        <td>${esc(u.plan_name ?? '—')}</td>
+        <td class="num">${u.plan_price_usd != null ? money(u.plan_price_usd) : '—'}</td>
+        <td>${u.subscription_status
+          ? `<span class="pill long">${esc(u.subscription_status)}</span>`
+          : '<span class="pill none">لا اشتراك</span>'}</td>
+        <td class="num">${num(u.period_analyses)}</td>
+        <td class="num">${num(u.total_analyses)}</td>
+        <td class="num">${money(u.period_cost_usd)}</td>
+        <td class="num" style="color:${Number(u.period_margin_usd) >= 0 ? 'var(--green)' : 'var(--red)'}">
+          ${u.period_margin_usd != null ? money(u.period_margin_usd) : '—'}</td>
+        <td class="num">${when(u.expires_at)}</td>
+        <td class="num">${when(u.last_analysis_at)}</td>
+        <td><button data-act="${u.is_blocked ? 'unblock' : 'block'}"
+          class="${u.is_blocked ? '' : 'danger'}">${u.is_blocked ? 'تفعيل' : 'إيقاف'}</button></td>
+      </tr>`).join('') || '<tr><td colspan="11" class="muted">ما في مستخدمين بعد</td></tr>'}</tbody>
+    </table></div>
+    <p class="muted">الهامش = سعر الباقة ناقص تكلفة نماذج الذكاء لهذا المشترك في فترته الحالية.</p>
+  </section>`;
+
+  p.onclick = async (ev) => {
+    const b = ev.target.closest('button[data-act]');
+    if (!b) return;
+    b.disabled = true;
+    try {
+      await post('/api/admin/users/block', {
+        userId: b.closest('tr').dataset.id,
+        blocked: b.dataset.act === 'block',
+      });
+      await loadAll();
+    } catch (err) { alert(err.message); b.disabled = false; }
+  };
+}
+
+function renderAnalyses(p) {
+  const pill = (d) => ({ LONG: 'long', SHORT: 'short', WAIT: 'wait' }[d] || 'none');
+  p.innerHTML = `<section>
+    <h2>آخر التحاليل</h2>
+    <div class="scroll"><table>
+      <thead><tr><th>الوقت</th><th>العملة</th><th>الفريم</th><th>القرار</th>
+        <th>الوضع</th><th>جودة البيانات</th><th>المدقّق</th><th>التكلفة</th><th>الزمن</th></tr></thead>
+      <tbody>${(state.analyses || []).map((a) => `<tr>
+        <td class="num">${when(a.created_at)}</td>
+        <td><code>${esc(a.symbol)}</code></td>
+        <td class="num">${esc(a.timeframe)}</td>
+        <td><span class="pill ${pill(a.decision)}">${esc(a.decision)}</span></td>
+        <td>${esc(a.analysis_mode)}</td>
+        <td>${esc(a.data_quality)}</td>
+        <td>${esc(a.verifier_status)}</td>
+        <td class="num">${money(a.cost_usd)}</td>
+        <td class="num">${(Math.round((a.elapsed_ms || 0) / 100) / 10).toFixed(1)}s</td>
+      </tr>`).join('') || '<tr><td colspan="9" class="muted">ما في تحاليل بعد</td></tr>'}</tbody>
+    </table></div>
+  </section>`;
+}
+
+function renderPlans(p) {
+  p.innerHTML = `<section>
+    <h2>الباقات</h2>
+    <p class="muted">السعر والحصص ومستوى النماذج تتعدّل من هون بدون لمس الكود.
+      تكلفتك التقريبية للتحليل الواحد: FAST ≈ $0.01 · PRO ≈ $0.11 · MAX ≈ $0.17.</p>
+    <div class="scroll"><table>
+      <thead><tr><th>الكود</th><th>الاسم</th><th>السعر</th><th>شهرياً</th><th>يومياً</th>
+        <th>المستوى</th><th>سقف التكلفة</th><th>ظاهرة</th><th></th></tr></thead>
+      <tbody>${(state.plans || []).map((pl) => `<tr data-id="${pl.id}">
+        <td><code>${esc(pl.code)}</code></td>
+        <td><input data-f="name_ar" value="${esc(pl.name_ar)}"></td>
+        <td><input data-f="price_usd" class="num" type="number" step="1" value="${pl.price_usd}"></td>
+        <td><input data-f="monthly_analyses" class="num" type="number" value="${pl.monthly_analyses}"></td>
+        <td><input data-f="daily_analyses" class="num" type="number" value="${pl.daily_analyses}"></td>
+        <td><input data-f="analysis_mode" value="${esc(pl.analysis_mode)}" style="width:82px"></td>
+        <td><input data-f="monthly_cost_cap_usd" class="num" type="number" step="1"
+          value="${pl.monthly_cost_cap_usd}"></td>
+        <td><input data-f="is_public" type="checkbox" ${pl.is_public ? 'checked' : ''} style="width:auto"></td>
+        <td><button class="primary" data-act="save">حفظ</button></td>
+      </tr>`).join('')}</tbody>
+    </table></div>
+  </section>`;
+
+  p.onclick = async (ev) => {
+    const b = ev.target.closest('button[data-act="save"]');
+    if (!b) return;
+    const tr = b.closest('tr');
+    const patch = { id: tr.dataset.id };
+    tr.querySelectorAll('[data-f]').forEach((i) => {
+      patch[i.dataset.f] = i.type === 'checkbox' ? i.checked
+        : (i.type === 'number' ? Number(i.value) : i.value);
+    });
+    b.disabled = true;
+    try { await post('/api/admin/plans', patch); await loadAll(); }
+    catch (err) { alert(err.message); b.disabled = false; }
+  };
+}
+
+function renderMethods(p) {
+  const card = (m = {}) => `
+    <div class="card" data-id="${m.id ?? ''}" style="margin-bottom:12px">
+      <div class="row">
+        <label>الاسم الظاهر للمشترك
+          <input data-f="label_ar" value="${esc(m.label_ar ?? '')}"></label>
+        <label>النوع
+          <input data-f="kind" value="${esc(m.kind ?? 'bank')}"
+            placeholder="bank / wallet / crypto / cash / other"></label>
+      </div>
+      <label>التفاصيل (JSON)
+        <textarea data-f="details" rows="3">${esc(JSON.stringify(m.details ?? {}, null, 1))}</textarea></label>
+      <label style="display:block;margin-top:10px">تعليمات للمشترك
+        <textarea data-f="instructions_ar" rows="2">${esc(m.instructions_ar ?? '')}</textarea></label>
+      <div style="display:flex;gap:12px;align-items:center;margin-top:10px">
+        <label style="display:flex;gap:6px;align-items:center;color:var(--text)">
+          <input data-f="is_active" type="checkbox" ${m.is_active ? 'checked' : ''} style="width:auto">
+          مفعّلة (تظهر للمشتركين)</label>
+        <span style="margin-inline-start:auto"></span>
+        <button class="primary" data-act="save">حفظ</button>
+        ${m.id ? '<button class="danger" data-act="delete">حذف</button>' : ''}
+      </div>
+    </div>`;
+
+  p.innerHTML = `<section>
+    <h2>طرق الدفع</h2>
+    <p class="muted">هاي اللي بتظهر للمشترك بصفحة الاشتراك. حط تفاصيلك الحقيقية وفعّلها.
+      خانة التفاصيل JSON — مثال بنك:
+      <code>{"bank":"...","account_name":"...","iban":"..."}</code> ·
+      كريبتو: <code>{"network":"TRC20","address":"T...","asset":"USDT"}</code></p>
+    <div id="methodList">${(state.methods || []).map(card).join('')}</div>
+    <button class="primary" id="addMethod">إضافة طريقة دفع</button>
+  </section>`;
+
+  $('addMethod').onclick = () => $('methodList').insertAdjacentHTML('beforeend', card());
+
+  p.onclick = async (ev) => {
+    const b = ev.target.closest('button[data-act]');
+    if (!b) return;
+    const box = b.closest('.card');
+    const id = box.dataset.id;
+
+    if (b.dataset.act === 'delete') {
+      if (!confirm('حذف طريقة الدفع هاي؟')) return;
+      b.disabled = true;
+      try {
+        await window.apiFetch(`/api/admin/payment-methods?id=${id}`, { method: 'DELETE' });
+        await loadAll();
+      } catch (err) { alert(err.message); b.disabled = false; }
+      return;
+    }
+
+    const patch = id ? { id } : {};
+    let bad = false;
+    box.querySelectorAll('[data-f]').forEach((i) => {
+      if (i.dataset.f === 'details') {
+        try { patch.details = JSON.parse(i.value || '{}'); } catch { bad = true; }
+      } else {
+        patch[i.dataset.f] = i.type === 'checkbox' ? i.checked : i.value;
+      }
+    });
+    if (bad) { alert('صيغة JSON بخانة التفاصيل غير صحيحة.'); return; }
+
+    b.disabled = true;
+    try { await post('/api/admin/payment-methods', patch); await loadAll(); }
+    catch (err) { alert(err.message); b.disabled = false; }
+  };
+}
+</script>
+</body>
+</html>
