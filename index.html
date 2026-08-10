@@ -1330,7 +1330,8 @@ async function fetchWithCorsFallback(url){
      something a paid product should depend on. */
   const sameOrigin = url
     .replace('https://query1.finance.yahoo.com/', '/ext/yahoo/')
-    .replace('https://nfs.faireconomy.media/', '/ext/calendar/');
+    .replace('https://nfs.faireconomy.media/', '/ext/calendar/')
+    .replace('https://api.frankfurter.app/', '/ext/fx/');
 
   try{
     const res = await fetchWithTimeout(sameOrigin, 8000);

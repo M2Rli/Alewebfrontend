@@ -162,15 +162,22 @@ async function post(path, body) {
 
 window.loadAll = async function loadAll() {
   try {
-    const [o, users, analyses, payments, plans, methods] = await Promise.all([
-      get('/api/admin/overview'),
-      get('/api/admin/users'),
-      get('/api/admin/analyses?limit=60'),
-      get('/api/admin/payment-requests?status=pending'),
-      get('/api/admin/plans'),
-      get('/api/admin/payment-methods'),
-    ]);
-    state = { ...o, ...users, ...analyses, ...payments, ...plans, ...methods };
+    // allSettled, not all: a single failing endpoint used to blank every tab,
+    // which hid the five that were working fine.
+    const paths = [
+      '/api/admin/overview',
+      '/api/admin/users',
+      '/api/admin/analyses?limit=60',
+      '/api/admin/payment-requests?status=pending',
+      '/api/admin/plans',
+      '/api/admin/payment-methods',
+    ];
+    const results = await Promise.allSettled(paths.map(get));
+    state = { _failed: [] };
+    results.forEach((r, i) => {
+      if (r.status === 'fulfilled') Object.assign(state, r.value);
+      else state._failed.push(`${paths[i]} — ${r.reason.message}`);
+    });
     renderKpis();
     renderPanel();
   } catch (err) {

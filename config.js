@@ -11,9 +11,11 @@
  * on the Render backend and must never appear in this file.
  */
 window.APP_CONFIG = {
-  // Same-origin. vercel.json rewrites /api/* to the Render backend, so the
-  // browser never makes a cross-origin request and CORS never applies.
-  API_BASE: '',
+  // Direct to Render. An analysis runs for minutes, and a Vercel rewrite is a
+  // gateway that gives up long before the pipeline finishes, so /api must not
+  // be proxied. This makes the call cross-origin: CORS_ORIGINS on the backend
+  // has to list this site's origin.
+  API_BASE: 'https://aleweb-api-fra.onrender.com',
   SUPABASE_URL: 'https://bqhabywuwkolhaddnyns.supabase.co',
   SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_Ptjp7Le0zQRxqlkBBLI6lA_ZVi_LinM',
 };
