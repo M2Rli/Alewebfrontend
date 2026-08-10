@@ -4,6 +4,14 @@
     {
       "source": "/api/:path*",
       "destination": "https://alewebbanckend.onrender.com/api/:path*"
+    },
+    {
+      "source": "/ext/yahoo/:path*",
+      "destination": "https://query1.finance.yahoo.com/:path*"
+    },
+    {
+      "source": "/ext/calendar/:path*",
+      "destination": "https://nfs.faireconomy.media/:path*"
     }
   ],
   "headers": [

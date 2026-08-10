@@ -1322,22 +1322,26 @@ function fetchWithTimeout(url, ms){
 }
 
 async function fetchWithCorsFallback(url){
+  /* Yahoo and the calendar feed send no CORS header, so the browser cannot read
+     them directly. We route through our own origin instead: vercel.json
+     rewrites /ext/* to those upstreams and Vercel fetches them server-side,
+     where CORS does not apply. The public proxies this used to fall back on
+     (allorigins.win, corsproxy.io) now answer 403 — a free shared proxy is not
+     something a paid product should depend on. */
+  const sameOrigin = url
+    .replace('https://query1.finance.yahoo.com/', '/ext/yahoo/')
+    .replace('https://nfs.faireconomy.media/', '/ext/calendar/');
+
   try{
-    const res = await fetchWithTimeout(url, 8000);
+    const res = await fetchWithTimeout(sameOrigin, 8000);
     if(!res.ok) throw new Error('bad status');
     return await res.json();
   }catch(e){
-    try{
-      const proxied = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
-      const res2 = await fetchWithTimeout(proxied, 8000);
-      if(!res2.ok) throw new Error('proxy1 failed');
-      return await res2.json();
-    }catch(e2){
-      const proxied2 = 'https://corsproxy.io/?url=' + encodeURIComponent(url);
-      const res3 = await fetchWithTimeout(proxied2, 8000);
-      if(!res3.ok) throw new Error('proxy2 failed too');
-      return await res3.json();
-    }
+    /* Direct hit as a fallback: works when the upstream does send CORS, and
+       when the page runs somewhere the rewrite does not exist. */
+    const res2 = await fetchWithTimeout(url, 8000);
+    if(!res2.ok) throw new Error('upstream unreachable');
+    return await res2.json();
   }
 }
 
