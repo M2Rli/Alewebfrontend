@@ -11,8 +11,9 @@
  * on the Render backend and must never appear in this file.
  */
 window.APP_CONFIG = {
-  // Render backend origin. Set this to your deployed API before going live.
-  API_BASE: 'https://aleweb-api.onrender.com',
+  // Same-origin. vercel.json rewrites /api/* to the Render backend, so the
+  // browser never makes a cross-origin request and CORS never applies.
+  API_BASE: '',
   SUPABASE_URL: 'https://bqhabywuwkolhaddnyns.supabase.co',
   SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_Ptjp7Le0zQRxqlkBBLI6lA_ZVi_LinM',
 };
