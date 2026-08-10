@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Deployment configuration.
  *
  * Loaded as a classic script so it runs before the page's inline script — that
