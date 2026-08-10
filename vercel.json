@@ -3,7 +3,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://alewebbanckend.onrender.com/api/:path*"
+      "destination": "https://aleweb-api-fra.onrender.com/api/:path*"
     },
     {
       "source": "/ext/yahoo/:path*",
