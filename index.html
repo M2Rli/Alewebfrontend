@@ -1955,8 +1955,9 @@ async function loadImgSymbols(){
   try{
     const r = await apiFetch('/api/market/instruments?marketType=' + encodeURIComponent(market), {cache:'no-store'});
     const j = await r.json();
-    if(!j.ok || !Array.isArray(j.symbols)) return;
-    list.innerHTML = j.symbols.slice(0, 400)
+    const symbols = Array.isArray(j.instruments) ? j.instruments : (j.symbols || []);
+    if(!symbols.length) return;
+    list.innerHTML = symbols.slice(0, 400)
       .map(s => '<option value="' + escapeSMC(s.symbol) + '"></option>').join('');
   }catch(e){ /* القائمة كماليات — الإدخال اليدوي بيضل شغّال */ }
 }
