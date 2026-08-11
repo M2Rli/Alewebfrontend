@@ -2030,11 +2030,15 @@ async function analyzeChartImage(){
       return;
     }
 
-    renderImgAnalysisResult(data.analysis);
+    /* The API returns the decision at the top level. An older build wrapped it
+       as {ok, analysis}, and reading data.analysis here threw on every
+       successful response — which the catch below then reported as a
+       connection failure. */
+    renderImgAnalysisResult(data);
   }catch(e){
     resultEl.innerHTML = `<div class="smc-suggestion" style="border-color:var(--red);">
       <div class="smc-sugg-title">⚠️ تعذّر الاتصال بالخادم</div>
-      <div style="font-size:12.5px; color:var(--text-muted); line-height:1.8;">تأكد إن الموقع شغّال عبر الخادم (run.cmd) وجرّب مرة تانية.</div>
+      <div style="font-size:12.5px; color:var(--text-muted); line-height:1.8;">ما وصلنا رد من الخادم. تأكد من اتصالك بالإنترنت وجرّب مرة تانية — وإذا كانت الخدمة نايمة، أول محاولة ممكن تاخد لحد دقيقة.</div>
     </div>`;
   }finally{
     stopImgStages();
