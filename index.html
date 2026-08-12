@@ -1879,6 +1879,35 @@ async function checkImgService(){
   updateImgAnalyzeBtnState();
 }
 
+/* قصاصة مكبّرة للزاوية العليا اليسرى — منبعتها مع الصورة الأصلية.
+   السبب: النماذج بتصغّر أي صورة أطول من ~1568 بكسل قبل ما تشوفها، فلقطة
+   شاشة عريضة بتضل شموعها واضحة بس خط الرمز الصغير بينهرس. القصاصة بترجّع
+   البكسلات لهالمنطقة بالذات، وفيها الرمز وأزرار الفريم بمعظم المنصات. */
+let imgTickerTile = null;
+
+const TILE = { widthFraction: 0.52, heightFraction: 0.20, targetWidth: 1400 };
+
+function buildTickerTile(img){
+  try{
+    const cw = Math.max(1, Math.round(img.naturalWidth * TILE.widthFraction));
+    const ch = Math.max(1, Math.round(img.naturalHeight * TILE.heightFraction));
+    /* ما منكبّر أكتر من 3x — فوق هيك منضخّم ضبابة مش تفاصيل. */
+    const scale = Math.min(3, Math.max(1, TILE.targetWidth / cw));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(cw * scale);
+    canvas.height = Math.round(ch * scale);
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(img, 0, 0, cw, ch, 0, 0, canvas.width, canvas.height);
+    /* PNG مش JPEG: الضغط الفاقد بيمسح حواف الحروف الصغيرة. */
+    const b64 = (canvas.toDataURL('image/png').split(',')[1]) || '';
+    return b64.length > 100 ? { base64: b64, mediaType: 'image/png' } : null;
+  }catch(e){
+    return null; /* القصاصة تحسين — الصورة الأصلية بتضل تنبعت لحالها */
+  }
+}
+
 function handleImgFile(file){
   if(!file || !file.type || !file.type.startsWith('image/')) return;
   const reader = new FileReader();
@@ -1886,12 +1915,18 @@ function handleImgFile(file){
     const dataUrl = reader.result;
     imgSelectedMediaType = file.type;
     imgSelectedBase64 = dataUrl.split(',')[1];
+    imgTickerTile = null;
+
     const preview = document.getElementById('imgPreview');
     preview.src = dataUrl;
     preview.style.display = 'block';
     const dropText = document.getElementById('imgDropText');
     if(dropText) dropText.style.display = 'none';
     updateImgAnalyzeBtnState();
+
+    const probe = new Image();
+    probe.onload = ()=>{ imgTickerTile = buildTickerTile(probe); };
+    probe.src = dataUrl;
   };
   reader.readAsDataURL(file);
 }
@@ -1964,7 +1999,12 @@ async function analyzeChartImage(){
       method: 'POST',
       headers: {'content-type': 'application/json'},
       body: JSON.stringify({
-        images: [{ base64: imgSelectedBase64, mediaType: imgSelectedMediaType }],
+        /* الأصلية أولاً، وبعدها القصاصة المكبّرة للزاوية يلي فيها الرمز
+           والفريم — عشان النموذج يقرأ النص الصغير قبل ما ينضغط. */
+        images: [
+          { base64: imgSelectedBase64, mediaType: imgSelectedMediaType },
+          ...(imgTickerTile ? [imgTickerTile] : [])
+        ],
         /* رأس المال المحفوظ من آخر مرة — مش مدخل سوق، بس عشان أرقام
            الرافعة والخسارة تطلع على حجم حسابك من أول رد. */
         equity: getSavedEquity()
@@ -2137,6 +2177,13 @@ function renderImgAnalysisResult(a){
       <div class="smc-sugg-grid">
         ${Object.entries(a.timeframeBias).map(([tf,b])=>row(tf.toUpperCase(), BIAS[b]||b)).join('')}
       </div>` : ''}
+    ${!id.resolved ? `<div class="smc-zone-note" style="margin-top:10px; border-color:var(--amber);">
+      🔎 <b>شو قرأت مرحلة الرؤية بالضبط:</b>
+      الرمز: <span class="ltr">${escapeSMC(id.symbolRead || 'لا شيء')}</span> ·
+      الفريم: <span class="ltr">${escapeSMC(id.timeframeRead || 'لا شيء')}</span> ·
+      المنصة: <span class="ltr">${escapeSMC(id.exchangeRead || 'لا شيء')}</span>
+      ${(id.symbolCandidates||[]).length ? '<br>قراءات محتملة جرّبناها: <span class="ltr">' + escapeSMC(id.symbolCandidates.join(' · ')) + '</span>' : ''}
+    </div>` : ''}
     <div class="smc-zone-note" style="margin-top:10px; opacity:.8;">
       إذا الرمز مقروء غلط، صوّر الشارت بحيث يبين اسم الأداة والفريم بوضوح فوق يسار.
     </div>
