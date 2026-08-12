@@ -849,47 +849,19 @@
     <div class="card">
       <div class="step-title">📷 حلل صورة شارت</div>
       <div class="smc-disclaimer" style="margin-top:0; margin-bottom:16px;">
-        ارفع صورة شارت وبيقرأها محرك تحليل SMC/ICT: هيكل السوق، السيولة، مناطق الأوامر، الـFVG، والعلاوة/الخصم — وبيعطيك قرار واضح مع درجة جودة الإعداد. المحرك مضبوط يرجّع «لا صفقة» لما ما يكون في إعداد سليم، وهاي نتيجة صحيحة مش فشل.
+        ارفع صورة الشارت وبس. المحرك بيقرأ الرمز والفريم والمنصة من الصورة نفسها — إذا الأداة موجودة على Bybit أو Binance بيجيب بياناتها الحية وبيشغّل تحليل SMC/ICT كامل، وإذا فوركس أو ذهب أو مؤشر بيحللها من الصورة وبينبّهك إن الأرقام تقريبية. النتيجة وحدة من تلاتة: <b>صفقة الآن</b>، <b>صفقة محتملة قريبة</b>، أو <b>لا صفقة</b> — و«لا صفقة» نتيجة صحيحة مش فشل.
       </div>
       <div id="imgServiceStatus" style="display:none;"></div>
 
       <div class="form-row">
-        <label>صورة الشارت (اختياري — المحرك بيشتغل على البيانات الحية كمان بدونها)</label>
         <div class="img-drop" id="imgDrop" onclick="document.getElementById('imgFileInput').click()">
-          <span id="imgDropText">📎 دوس هون لاختيار صورة، أو الصق صورة (Ctrl+V) بعد ما تدوس هون</span>
+          <span id="imgDropText">📎 دوس هون لاختيار صورة الشارت، أو الصق صورة (Ctrl+V)</span>
           <img id="imgPreview" style="display:none;" alt="معاينة الصورة">
         </div>
         <input type="file" id="imgFileInput" accept="image/*" style="display:none;" onchange="handleImgFile(this.files[0])">
       </div>
 
-      <div class="form-row">
-        <label>الأداة</label>
-        <input list="imgSymbolList" id="imgSymbol" value="BTCUSDT" placeholder="BTCUSDT"
-               oninput="this.value=this.value.toUpperCase(); updateImgAnalyzeBtnState();">
-        <datalist id="imgSymbolList"></datalist>
-      </div>
-
-      <div class="form-row">
-        <label>السوق</label>
-        <select id="imgMarket" onchange="loadImgSymbols()">
-          <option value="linear">Bybit — عقود دائمة (USDT)</option>
-          <option value="spot">Bybit — سبوت</option>
-          <option value="inverse">Bybit — عقود عكسية</option>
-        </select>
-      </div>
-
-      <div class="form-row">
-        <label>إطار التنفيذ</label>
-        <select id="imgTimeframe">
-          <option value="1m">1 دقيقة</option>
-          <option value="5m" selected>5 دقائق</option>
-          <option value="15m">15 دقيقة</option>
-          <option value="1h">ساعة</option>
-          <option value="4h">4 ساعات</option>
-        </select>
-      </div>
-
-      <button class="btn" id="imgAnalyzeBtn" onclick="analyzeChartImage()" disabled>🔍 حلل السوق</button>
+      <button class="btn" id="imgAnalyzeBtn" onclick="analyzeChartImage()" disabled>🔍 حلّل الشارت</button>
       <div id="imgAnalysisResult"></div>
 
       <div class="smc-disclaimer">⚠️ التحليل بالذكاء الاصطناعي تقديري وبيعتمد على وضوح الصور — ممكن يخطئ بقراءة الأرقام أو الاتجاه. راجع دايماً الأرقام بعينك ولا تعتمد عليه وحده قبل التنفيذ — مش توصية استثمارية.</div>
@@ -1941,31 +1913,14 @@ document.addEventListener('paste', (e)=>{
 function updateImgAnalyzeBtnState(){
   const btn = document.getElementById('imgAnalyzeBtn');
   if(!btn) return;
-  const sym = (document.getElementById('imgSymbol')||{}).value || '';
-  /* الصورة اختيارية: المحرك بيقدر يشتغل على بيانات المنصة الحية لحالها. */
-  btn.disabled = !(sym.trim().length >= 4 && imgServiceReady !== false);
-}
-
-/* منعبّي قائمة الأدوات من خادمنا — نفس المزوّد يلي بيغذي التحليل،
-   عشان ما نعرض للمستخدم رمز المنصة ما بتدعمه. */
-async function loadImgSymbols(){
-  const market = (document.getElementById('imgMarket')||{}).value || 'linear';
-  const list = document.getElementById('imgSymbolList');
-  if(!list) return;
-  try{
-    const r = await apiFetch('/api/market/instruments?marketType=' + encodeURIComponent(market), {cache:'no-store'});
-    const j = await r.json();
-    const symbols = Array.isArray(j.instruments) ? j.instruments : (j.symbols || []);
-    if(!symbols.length) return;
-    list.innerHTML = symbols.slice(0, 400)
-      .map(s => '<option value="' + escapeSMC(s.symbol) + '"></option>').join('');
-  }catch(e){ /* القائمة كماليات — الإدخال اليدوي بيضل شغّال */ }
+  /* الصورة صارت كل المدخلات: منها بيتقرأ الرمز والفريم والمنصة. */
+  btn.disabled = !(imgSelectedBase64 && imgServiceReady !== false);
 }
 
 /* مراحل الانتظار — بتعكس مراحل المحرك الفعلية مش سبينر صامت */
 const IMG_STAGES = [
-  'التحقق من الطلب...',
-  'قراءة الشارت بصرياً...',
+  'قراءة الشارت وتحديد الأداة...',
+  'مطابقة الرمز مع Bybit و Binance...',
   'جلب بيانات السوق الحية...',
   'فحص جودة البيانات...',
   'تحليل هيكل السوق...',
@@ -1976,6 +1931,7 @@ const IMG_STAGES = [
   'تحليل الذكاء الاصطناعي المتقدم...',
   'التحقق من مستويات الصفقة...',
   'مراجعة مستقلة...',
+  'حساب الرافعة وحجم المركز...',
   'إنهاء القرار...'
 ];
 let imgStageTimer = null;
@@ -1998,10 +1954,7 @@ function stopImgStages(){ if(imgStageTimer){ clearInterval(imgStageTimer); imgSt
 
 async function analyzeChartImage(){
   const resultEl = document.getElementById('imgAnalysisResult');
-  const symbol = ((document.getElementById('imgSymbol')||{}).value || '').trim().toUpperCase();
-  const marketType = (document.getElementById('imgMarket')||{}).value || 'linear';
-  const executionTimeframe = (document.getElementById('imgTimeframe')||{}).value || '5m';
-  if(!symbol) return;
+  if(!imgSelectedBase64) return;
 
   document.getElementById('imgAnalyzeBtn').disabled = true;
   startImgStages();
@@ -2011,18 +1964,16 @@ async function analyzeChartImage(){
       method: 'POST',
       headers: {'content-type': 'application/json'},
       body: JSON.stringify({
-        symbol,
-        marketType,
-        executionTimeframe,
-        images: imgSelectedBase64
-          ? [{ base64: imgSelectedBase64, mediaType: imgSelectedMediaType }]
-          : []
+        images: [{ base64: imgSelectedBase64, mediaType: imgSelectedMediaType }],
+        /* رأس المال المحفوظ من آخر مرة — مش مدخل سوق، بس عشان أرقام
+           الرافعة والخسارة تطلع على حجم حسابك من أول رد. */
+        equity: getSavedEquity()
       })
     });
 
     const data = await res.json().catch(()=>null);
 
-    if(!res.ok || !data || !data.decision){
+    if(!res.ok || !data || !data.state){
       const msg = (data && data.message) || 'صار خطأ غير متوقع. جرّب مرة تانية.';
       resultEl.innerHTML = `<div class="smc-suggestion" style="border-color:var(--red);">
         <div class="smc-sugg-title">⚠️ ما قدرنا نكمّل التحليل</div>
@@ -2047,22 +1998,50 @@ async function analyzeChartImage(){
   }
 }
 
+/* رأس المال المرجعي لحساب الرافعة والخسارة. مش مدخل سوق — كل الأرقام
+   بتتناسب معه خطياً، فمنقدر نعيد تسعير الخطة كلها بالمتصفح بدون تحليل جديد. */
+const EQUITY_KEY = 'the-op-equity-usd';
+const DEFAULT_EQUITY = 1000;
+
+function getSavedEquity(){
+  try{
+    const v = Number(localStorage.getItem(EQUITY_KEY));
+    return Number.isFinite(v) && v > 0 ? v : DEFAULT_EQUITY;
+  }catch(e){ return DEFAULT_EQUITY; }
+}
+function setSavedEquity(v){
+  try{ localStorage.setItem(EQUITY_KEY, String(v)); }catch(e){}
+}
+
+const fmtUsd = (v)=> v == null || !isFinite(v)
+  ? '—'
+  : '$' + Number(v).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+const fmtPct = (v)=> v == null || !isFinite(v) ? '—' : Number(v).toFixed(2) + '%';
+/* مبلغ بإشارة صريحة: ‎+$120.50‎ / ‎-$25.00‎ — بدون ما تنقلب الإشارة على «—». */
+const fmtSignedUsd = (sign, v)=> (v == null || !isFinite(v)) ? '—' : sign + fmtUsd(v);
+
 function renderImgAnalysisResult(a){
   const el = document.getElementById('imgAnalysisResult');
   lastImgAnalysis = a;
 
   const BIAS = {bullish:'صاعد', bearish:'هابط', unclear:'غير واضح', unavailable:'غير متاح'};
-  const DECISION = {
-    LONG:{t:'🟢 شراء (LONG)', c:'var(--green)'},
-    SHORT:{t:'🔴 بيع (SHORT)', c:'var(--red)'},
-    WAIT:{t:'⏳ انتظر التأكيد', c:'var(--amber)'},
-    NO_TRADE:{t:'🚫 لا صفقة', c:'var(--red)'}
-  };
-  const DQ = {PASS:'سليمة', DEGRADED:'منقوصة', FAIL:'غير صالحة'};
+  const DQ = {PASS:'سليمة', DEGRADED:'منقوصة', FAIL:'غير صالحة', IMAGE_ONLY:'من الصورة فقط'};
   const VERIFIER = {APPROVE:'وافق', REJECT:'رفض', WAIT:'طلب انتظار', 'not-run':'ما اشتغل', unavailable:'غير متاح'};
+  const KIND = {crypto:'عملات رقمية', forex:'فوركس', commodity:'سلعة/معدن', index:'مؤشر', stock:'سهم', unknown:'غير معروف'};
 
-  const d = DECISION[a.decision] || DECISION.NO_TRADE;
-  const directional = a.decision === 'LONG' || a.decision === 'SHORT';
+  /* الحالات الثلاث — ما في غيرها */
+  const dirWord = a.direction === 'SHORT' ? 'بيع (SHORT)' : 'شراء (LONG)';
+  const STATE = {
+    TRADE_NOW: {
+      t: (a.direction === 'SHORT' ? '🔴' : '🟢') + ' صفقة الآن — ' + dirWord,
+      c: a.direction === 'SHORT' ? 'var(--red)' : 'var(--green)'
+    },
+    TRADE_SOON: { t:'🟡 صفقة محتملة قريبة — ' + dirWord, c:'var(--amber)' },
+    NO_TRADE:   { t:'⚪ لا صفقة', c:'var(--text-dim)' }
+  };
+  const s = STATE[a.state] || STATE.NO_TRADE;
+  const hasPlan = a.state === 'TRADE_NOW' || a.state === 'TRADE_SOON';
+
   const list = (arr)=> (arr && arr.length)
     ? arr.map(x=>`<div class="smc-zone-note">• ${escapeSMC(x)}</div>`).join('')
     : '<div class="smc-zone-note" style="opacity:.6;">— لا شيء ملحوظ</div>';
@@ -2071,9 +2050,9 @@ function renderImgAnalysisResult(a){
 
   let html = '';
 
-  /* ---- القرار ---- */
-  html += `<div class="smc-suggestion" style="border-color:${d.c};">
-    <div class="smc-sugg-title" style="color:${d.c};">${d.t}</div>
+  /* ---- الحالة ---- */
+  html += `<div class="smc-suggestion" style="border-color:${s.c};">
+    <div class="smc-sugg-title" style="color:${s.c};">${s.t}</div>
     <div style="font-size:12.5px; color:var(--text-muted); line-height:1.9;">
       ${a.reasoningSummary && a.reasoningSummary.length
         ? a.reasoningSummary.map(x=>escapeSMC(x)).join('<br>')
@@ -2081,20 +2060,47 @@ function renderImgAnalysisResult(a){
     </div>
   </div>`;
 
-  /* ---- خطة الصفقة ---- */
-  if(directional){
-    html += `<div class="card" style="margin-top:14px;">
-      <div class="card-title">📐 خطة الصفقة — ${escapeSMC(a.setupType || '')}</div>
+  /* ---- تنبيه الأرقام التقريبية (فوركس / أداة مش على المنصات) ---- */
+  if(a.approximate){
+    html += `<div class="smc-suggestion" style="border-color:var(--amber); margin-top:14px;">
+      <div class="smc-sugg-title" style="color:var(--amber);">⚠️ الأرقام تقريبية</div>
+      <div style="font-size:12.5px; color:var(--text-muted); line-height:1.9;">
+        ${escapeSMC(a.approximateReason || '')}
+      </div>
+    </div>`;
+  }
+
+  /* ---- سعر التفعيل (صفقة محتملة قريبة) ---- */
+  if(a.state === 'TRADE_SOON'){
+    html += `<div class="card" style="margin-top:14px; border-color:var(--amber);">
+      <div class="card-title">⏱️ متى بتصير صفقة</div>
       <div class="smc-sugg-grid">
-        ${row('منطقة الدخول', a.entry.from != null ? '<span class="ltr">'+a.entry.from+' – '+a.entry.to+'</span>' : '—')}
+        ${row('السعر المطلوب للتفعيل', '<span class="ltr" style="color:var(--amber); font-weight:800;">' + (a.triggerPrice ?? '—') + '</span>')}
+        ${row('السعر الحالي', num(a.currentPrice))}
+      </div>
+      ${a.triggerReason ? '<div class="smc-zone-note" style="margin-top:10px;">📌 <b>السبب:</b> ' + escapeSMC(a.triggerReason) + '</div>' : ''}
+      <div class="smc-zone-note" style="margin-top:6px; opacity:.8;">الأرقام تحت هي الخطة <b>المفترضة</b> إذا تفعّلت — مش أمر تنفيذ الآن.</div>
+    </div>`;
+  }
+
+  /* ---- خطة الصفقة ---- */
+  if(hasPlan){
+    const planTitle = a.state === 'TRADE_NOW' ? '📐 خطة الصفقة' : '📐 الخطة المفترضة عند التفعيل';
+    html += `<div class="card" style="margin-top:14px;">
+      <div class="card-title">${planTitle}${a.setupType ? ' — ' + escapeSMC(a.setupType) : ''}</div>
+      <div class="smc-sugg-grid">
+        ${row('منطقة الدخول', a.entry && a.entry.from != null ? '<span class="ltr">'+a.entry.from+' – '+a.entry.to+'</span>' : '—')}
         ${row('وقف الخسارة', num(a.stopLoss))}
         ${row('TP1', num(a.targets.tp1))}
         ${row('TP2', num(a.targets.tp2))}
         ${row('TP3', num(a.targets.tp3))}
         ${row('العائد/المخاطرة', a.riskReward ? '<span class="ltr">1:'+a.riskReward.value+'</span>' : '—')}
       </div>
-      <button class="btn" style="margin-top:12px;" onclick="applyImgAnalysisToCalculator()">📥 افتح بالحاسبة (لحساب الرافعة/اللوت)</button>
+      <button class="btn" style="margin-top:12px;" onclick="applyImgAnalysisToCalculator()">📥 افتح بالحاسبة</button>
     </div>`;
+
+    /* ---- الرافعة وحجم المركز ---- */
+    html += `<div class="card" style="margin-top:14px;" id="imgPositionCard">${renderPositionCard(a)}</div>`;
 
     const pct = Math.max(0, Math.min(100, a.setupQuality || 0));
     html += `<div class="card" style="margin-top:14px;">
@@ -2104,7 +2110,7 @@ function renderImgAnalysisResult(a){
     </div>`;
   }
 
-  /* ---- شو لازم يصير (WAIT) ---- */
+  /* ---- شو لازم يصير ---- */
   if(a.confirmationRequired && a.confirmationRequired.length){
     html += `<div class="card" style="margin-top:14px;">
       <div class="card-title">👀 شو لازم يصير قبل الدخول</div>
@@ -2112,20 +2118,27 @@ function renderImgAnalysisResult(a){
     </div>`;
   }
 
-  /* ---- تعريف السوق ---- */
+  /* ---- شو قرأ المحرك من الصورة ---- */
+  const id = a.identification || {};
   html += `<div class="card" style="margin-top:14px;">
-    <div class="card-title">🧭 تعريف السوق</div>
+    <div class="card-title">🧭 شو قرأ المحرك من الصورة</div>
     <div class="smc-sugg-grid">
       ${row('الأداة', escapeSMC(a.symbol || '—'))}
+      ${row('الإطار', escapeSMC(a.timeframe || '—') + (id.timeframeAssumed ? ' <span style="opacity:.6;font-size:11px;">(افتراضي)</span>' : ''))}
+      ${row('المنصة', escapeSMC(a.exchange || (id.exchangeRead || 'ما ظهرت بالصورة')))}
+      ${row('نوع السوق', KIND[id.marketKind] || escapeSMC(id.marketKind || '—'))}
+      ${row('مصدر الأرقام', a.dataSource === 'live' ? '🟢 بيانات حية' : '🟡 من الصورة')}
       ${row('السعر الحالي', num(a.currentPrice))}
-      ${row('الإطار', escapeSMC(a.timeframe || '—'))}
       ${row('حالة السوق', escapeSMC(a.marketRegime || '—'))}
-      ${row('الاتجاه المهيمن', BIAS[a.higherTimeframeBias] || '—')}
-      ${row('جودة البيانات', DQ[a.dataQuality] || '—')}
+      ${row('جودة البيانات', DQ[a.dataQuality] || escapeSMC(a.dataQuality || '—'))}
     </div>
-    <div class="market-section-title">الاتجاه حسب كل إطار</div>
-    <div class="smc-sugg-grid">
-      ${Object.entries(a.timeframeBias || {}).map(([tf,b])=>row(tf.toUpperCase(), BIAS[b]||b)).join('')}
+    ${Object.keys(a.timeframeBias||{}).length ? `
+      <div class="market-section-title">الاتجاه حسب كل إطار</div>
+      <div class="smc-sugg-grid">
+        ${Object.entries(a.timeframeBias).map(([tf,b])=>row(tf.toUpperCase(), BIAS[b]||b)).join('')}
+      </div>` : ''}
+    <div class="smc-zone-note" style="margin-top:10px; opacity:.8;">
+      إذا الرمز مقروء غلط، صوّر الشارت بحيث يبين اسم الأداة والفريم بوضوح فوق يسار.
     </div>
   </div>`;
 
@@ -2136,6 +2149,7 @@ function renderImgAnalysisResult(a){
     ${(a.cancelConditions||[]).length ? '<div class="market-section-title">شروط الإلغاء</div>' + list(a.cancelConditions) : ''}
     ${(a.riskFactors||[]).length ? '<div class="market-section-title">عوامل الخطر</div>' + list(a.riskFactors) : ''}
     ${(a.conflictingEvidence||[]).length ? '<div class="market-section-title">أدلة معاكسة</div>' + list(a.conflictingEvidence) : ''}
+    ${(a.warnings||[]).length ? '<div class="market-section-title">تنبيهات القراءة</div>' + list(a.warnings) : ''}
   </div>`;
 
   /* ---- الشفافية: مين وافق ومين رفض ---- */
@@ -2155,17 +2169,100 @@ function renderImgAnalysisResult(a){
   el.innerHTML = html;
 }
 
+/* بطاقة الرافعة والخسارة والربح.
+   كل مبلغ بالدولار بيتناسب خطياً مع رأس المال، والرافعة مستقلة عنه تماماً
+   (بتعتمد على مسافة الوقف بس) — فإعادة الحساب بالمتصفح دقيقة مش تقريب. */
+function renderPositionCard(a){
+  const p = a.position;
+  const equity = getSavedEquity();
+
+  const capitalRow = `<div class="form-row" style="margin-bottom:12px;">
+    <label>رأس مالك (لحساب الرافعة والخسارة)</label>
+    <input type="number" id="imgEquityInput" class="ltr" min="1" step="any" value="${equity}"
+           oninput="onImgEquityChange(this.value)">
+  </div>`;
+
+  if(!p){
+    return `<div class="card-title">💰 حجم المركز</div>${capitalRow}
+      <div class="smc-zone-note">— ما في مستويات لحساب المركز.</div>`;
+  }
+
+  if(p.tradable === false){
+    return `<div class="card-title">💰 حجم المركز</div>${capitalRow}
+      <div class="smc-zone-note" style="border-color:var(--red);">
+        🚫 <b>الإعداد مرفوض حسب سياسة المخاطرة:</b> ${escapeSMC(p.detail || p.reason || '')}
+      </div>`;
+  }
+
+  /* k = نسبة رأس المال الجديد لرأس المال يلي انحسبت عليه النتيجة */
+  const k = p.equity > 0 ? equity / p.equity : 1;
+  const row = (label, value)=> `<div class="smc-sugg-mini"><div class="smc-sugg-mini-label">${label}</div><div class="smc-sugg-mini-value">${value}</div></div>`;
+
+  const tps = (p.targets || []).map(t => `
+    <div class="smc-sugg-mini">
+      <div class="smc-sugg-mini-label">${t.label} · <span class="ltr">${t.price}</span> · RR 1:${t.rr}</div>
+      <div class="smc-sugg-mini-value" style="color:var(--green);">
+        <span class="ltr">${fmtSignedUsd('+', t.profitUsd * k)}</span>
+        <span style="opacity:.7; font-size:11.5px;">(${fmtPct(t.profitPctOfEquity)} من رأس المال)</span>
+      </div>
+    </div>`).join('');
+
+  return `<div class="card-title">💰 الرافعة وحجم المركز</div>
+    ${capitalRow}
+    <div class="smc-sugg-grid">
+      ${row('الرافعة', '<span class="ltr" style="font-weight:800;">' + p.leverage + 'x</span>' + (p.isSpot ? ' <span style="opacity:.6;font-size:11px;">(سبوت)</span>' : ''))}
+      ${row('الهامش المستخدم', '<span class="ltr">' + fmtUsd(p.marginUsd * k) + '</span>')}
+      ${row('حجم الصفقة', '<span class="ltr">' + fmtUsd(p.notionalUsd * k) + '</span>')}
+      ${row('الكمية', '<span class="ltr">' + (p.quantity * k).toFixed(6) + '</span>')}
+      ${row('مسافة الوقف', '<span class="ltr">' + fmtPct(p.stopDistancePct) + '</span>')}
+      ${row('العائد/المخاطرة (TP1)', '<span class="ltr">1:' + p.rrFirstTarget + '</span>')}
+    </div>
+
+    <div class="market-section-title">لو ضرب الوقف</div>
+    <div class="smc-sugg-grid">
+      ${row('الخسارة', '<span class="ltr" style="color:var(--red); font-weight:800;">' + fmtSignedUsd('-', p.lossUsd * k) + '</span>')}
+      ${row('من رأس المال', '<span class="ltr" style="color:var(--red);">' + fmtPct(p.lossPctOfEquity) + '</span>')}
+      ${row('من الهامش', '<span class="ltr" style="color:var(--red);">' + fmtPct(p.lossPctOfMargin) + '</span>')}
+    </div>
+
+    <div class="market-section-title">لو وصل الأهداف</div>
+    <div class="smc-sugg-grid">${tps || '<div class="smc-zone-note" style="opacity:.6;">— ما في أهداف محسوبة</div>'}</div>
+
+    ${p.meetsPolicyRR === false ? '<div class="smc-zone-note" style="margin-top:10px; border-color:var(--amber);">⚠️ الهدف الأول تحت الحد الأدنى للعائد/المخاطرة بالسياسة (1:' + (p.policy ? p.policy.minRR : '') + ').</div>' : ''}
+    <div class="smc-zone-note" style="margin-top:10px; opacity:.8;">
+      السياسة: هامش ${p.policy ? p.policy.marginPctOfEquity : ''}% من رأس المال، وأقصى خسارة ${p.policy ? p.policy.maxLossPctOfEquity : ''}% منه.
+      الرافعة <b>ناتج</b> مسافة الوقف مش خيار — وما بتتغيّر لما تغيّر رأس مالك.
+    </div>`;
+}
+
+function onImgEquityChange(value){
+  const v = Number(value);
+  if(!isFinite(v) || v <= 0) return;
+  setSavedEquity(v);
+  const card = document.getElementById('imgPositionCard');
+  if(!card || !lastImgAnalysis) return;
+  /* منحدّث الأرقام بس، وما منلمس خانة الإدخال عشان ما يطير المؤشر. */
+  const input = document.getElementById('imgEquityInput');
+  const caret = input ? input.selectionStart : null;
+  card.innerHTML = renderPositionCard(lastImgAnalysis);
+  const fresh = document.getElementById('imgEquityInput');
+  if(fresh){
+    fresh.value = value;
+    fresh.focus();
+    try{ fresh.setSelectionRange(caret, caret); }catch(e){}
+  }
+}
+
 function applyImgAnalysisToCalculator(){
   const a = lastImgAnalysis;
-  if(!a || (a.decision !== 'LONG' && a.decision !== 'SHORT')) return;
-  /* حافة المنطقة يلي لازم السعر يوصلها عشان تنفتح الصفقة. */
-  const entry = a.decision === 'LONG'
-    ? Math.max(a.entry.from, a.entry.to)
-    : Math.min(a.entry.from, a.entry.to);
+  if(!a || (a.state !== 'TRADE_NOW' && a.state !== 'TRADE_SOON')) return;
+  /* سعر التفعيل للصفقة المحتملة، وحافة منطقة الدخول للصفقة الحالية. */
+  const entry = a.entryPrice != null ? a.entryPrice
+    : (a.direction === 'LONG' ? Math.max(a.entry.from, a.entry.to) : Math.min(a.entry.from, a.entry.to));
   if(entry == null || a.stopLoss == null) return;
 
   switchPage('calc');
-  selectDirection(a.decision === 'SHORT' ? 'sell' : 'buy');
+  selectDirection(a.direction === 'SHORT' ? 'sell' : 'buy');
   document.getElementById('entry').value = entry;
   document.getElementById('stop').value = a.stopLoss;
   const tp = [a.targets.tp1, a.targets.tp2, a.targets.tp3].find(t => t != null);
@@ -2192,7 +2289,6 @@ function applyImgAnalysisToCalculator(){
 }
 
 checkImgService();
-loadImgSymbols();
 
 /* ================= PAGE TABS ================= */
 const pageTabsEl = document.getElementById('pageTabs');
@@ -2207,7 +2303,7 @@ if(pageTabsEl){
 
 const PAGE_META = {
   calc:     ['حاسبة حجم الصفقة', 'احسب حجم صفقتك وخسارتك المحتملة قبل ما تدخل السوق'],
-  imgchart: ['تحليل صورة الشارت', 'ارفع صورة الشارت ويعطيك قراءة SMC مع دخول ووقف وهدف'],
+  imgchart: ['تحليل صورة الشارت', 'ارفع الصورة وبس — والمحرك بيقرأ الرمز والفريم ويعطيك: صفقة الآن، صفقة محتملة قريبة، أو لا صفقة'],
   prices:   ['الأسعار والأخبار', 'أسعار لحظية وأهم أخبار السوق'],
   pulse:    ['نبض السوق', 'حالة السوق العامة ومؤشرات الزخم'],
   limit:    ['حد الخسارة اليومي', 'اضبط سقف خسارتك اليومي ووقّف نفسك قبل ما تتمادى'],
