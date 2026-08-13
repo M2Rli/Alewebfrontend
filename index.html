@@ -2138,8 +2138,14 @@ function renderImgAnalysisResult(a){
         ${row('TP1', num(a.targets.tp1))}
         ${row('TP2', num(a.targets.tp2))}
         ${row('TP3', num(a.targets.tp3))}
-        ${row('العائد/المخاطرة', a.riskReward ? '<span class="ltr">1:'+a.riskReward.value+'</span>' : '—')}
+        ${row('العائد/المخاطرة', a.riskReward
+          ? '<span class="ltr" style="color:' + (a.riskReward.value >= 2.3 ? 'var(--green)' : 'var(--amber)') + ';">1:' + a.riskReward.value + '</span>'
+          : '—')}
       </div>
+      ${a.riskReward && a.riskReward.value < 2.3 ? `<div class="smc-zone-note" style="margin-top:10px; border-color:var(--amber);">
+        ⚖️ الهدف الأول قريب نسبة لمسافة الوقف (<span class="ltr">1:${a.riskReward.value}</span>، والمفضّل <span class="ltr">1:2.3</span>).
+        الأهداف الأبعد بتحسّن النسبة — فكّر بالخروج على مراحل بدل هدف واحد.
+      </div>` : ''}
       <button class="btn" style="margin-top:12px;" onclick="applyImgAnalysisToCalculator()">📥 افتح بالحاسبة (الرافعة وحجم المركز)</button>
     </div>`;
 
