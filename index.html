@@ -2038,8 +2038,8 @@ async function analyzeChartImage(){
   }
 }
 
-/* رأس المال المرجعي لحساب الرافعة والخسارة. مش مدخل سوق — كل الأرقام
-   بتتناسب معه خطياً، فمنقدر نعيد تسعير الخطة كلها بالمتصفح بدون تحليل جديد. */
+/* رأس المال المرجعي. الرافعة وحجم المركز ما عادوا ينعرضوا هون — الحاسبة
+   بتعملهم — بس الخادم بيضل يحسبهم ويحفظهم بسجل التحليل، فمنبعتله الرقم. */
 const EQUITY_KEY = 'the-op-equity-usd';
 const DEFAULT_EQUITY = 1000;
 
@@ -2049,16 +2049,6 @@ function getSavedEquity(){
     return Number.isFinite(v) && v > 0 ? v : DEFAULT_EQUITY;
   }catch(e){ return DEFAULT_EQUITY; }
 }
-function setSavedEquity(v){
-  try{ localStorage.setItem(EQUITY_KEY, String(v)); }catch(e){}
-}
-
-const fmtUsd = (v)=> v == null || !isFinite(v)
-  ? '—'
-  : '$' + Number(v).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
-const fmtPct = (v)=> v == null || !isFinite(v) ? '—' : Number(v).toFixed(2) + '%';
-/* مبلغ بإشارة صريحة: ‎+$120.50‎ / ‎-$25.00‎ — بدون ما تنقلب الإشارة على «—». */
-const fmtSignedUsd = (sign, v)=> (v == null || !isFinite(v)) ? '—' : sign + fmtUsd(v);
 
 function renderImgAnalysisResult(a){
   const el = document.getElementById('imgAnalysisResult');
@@ -2087,6 +2077,20 @@ function renderImgAnalysisResult(a){
     : '<div class="smc-zone-note" style="opacity:.6;">— لا شيء ملحوظ</div>';
   const row = (label, value)=> `<div class="smc-sugg-mini"><div class="smc-sugg-mini-label">${label}</div><div class="smc-sugg-mini-value">${value}</div></div>`;
   const num = (v)=> v == null ? '—' : `<span class="ltr">${v}</span>`;
+
+  /* أهم ٣ بنود ظاهرة، والباقي مطوي. القوائم الطويلة كانت بتخفي المهم
+     بدل ما تضيف — مين بدو يقرا ١٢ سطر قبل ما يقرر. */
+  const listTop = (arr, max)=>{
+    const items = (arr || []).filter(Boolean);
+    if(!items.length) return '<div class="smc-zone-note" style="opacity:.6;">— لا شيء ملحوظ</div>';
+    const shown = items.slice(0, max).map(x=>`<div class="smc-zone-note">• ${escapeSMC(x)}</div>`).join('');
+    const rest = items.slice(max);
+    if(!rest.length) return shown;
+    return shown + `<details style="margin-top:6px;">
+      <summary style="cursor:pointer; font-size:12px; color:var(--text-dim); padding:6px 2px;">+ ${rest.length} تفاصيل إضافية</summary>
+      ${rest.map(x=>`<div class="smc-zone-note">• ${escapeSMC(x)}</div>`).join('')}
+    </details>`;
+  };
 
   let html = '';
 
@@ -2136,11 +2140,11 @@ function renderImgAnalysisResult(a){
         ${row('TP3', num(a.targets.tp3))}
         ${row('العائد/المخاطرة', a.riskReward ? '<span class="ltr">1:'+a.riskReward.value+'</span>' : '—')}
       </div>
-      <button class="btn" style="margin-top:12px;" onclick="applyImgAnalysisToCalculator()">📥 افتح بالحاسبة</button>
+      <button class="btn" style="margin-top:12px;" onclick="applyImgAnalysisToCalculator()">📥 افتح بالحاسبة (الرافعة وحجم المركز)</button>
     </div>`;
 
-    /* ---- الرافعة وحجم المركز ---- */
-    html += `<div class="card" style="margin-top:14px;" id="imgPositionCard">${renderPositionCard(a)}</div>`;
+    /* الرافعة وحجم المركز كانوا هون وانشالوا: الحاسبة بتعملهم أصلاً وبإعدادات
+       المستخدم، فتكرارهم هون كان ضجيج بدل معلومة. */
 
     const pct = Math.max(0, Math.min(100, a.setupQuality || 0));
     html += `<div class="card" style="margin-top:14px;">
@@ -2150,11 +2154,18 @@ function renderImgAnalysisResult(a){
     </div>`;
   }
 
-  /* ---- شو لازم يصير ---- */
-  if(a.confirmationRequired && a.confirmationRequired.length){
+  /* ---- الخلاصة ---- */
+  if(hasPlan && (a.confirmationRequired||[]).length){
+    const dirAr = a.direction === 'SHORT' ? 'بيع' : 'شراء';
+    const bottomLine = a.state === 'TRADE_SOON'
+      ? `استنّى السعر يوصل <span class="ltr" style="color:var(--amber);font-weight:800;">${a.triggerPrice ?? '—'}</span> ← بعدها ${dirAr} · وقف <span class="ltr">${a.stopLoss ?? '—'}</span> · أول هدف <span class="ltr">${a.targets.tp1 ?? '—'}</span>`
+      : `${dirAr} الآن من <span class="ltr">${a.entry.from} – ${a.entry.to}</span> · وقف <span class="ltr">${a.stopLoss ?? '—'}</span> · أول هدف <span class="ltr">${a.targets.tp1 ?? '—'}</span>`;
+
     html += `<div class="card" style="margin-top:14px;">
-      <div class="card-title">👀 شو لازم يصير قبل الدخول</div>
-      ${list(a.confirmationRequired)}
+      <div class="card-title">✅ الخلاصة</div>
+      <div class="smc-zone-note" style="font-size:13.5px; line-height:2;">${bottomLine}</div>
+      <div class="market-section-title">شرط التنفيذ</div>
+      ${listTop(a.confirmationRequired, 2)}
     </div>`;
   }
 
@@ -2193,10 +2204,14 @@ function renderImgAnalysisResult(a){
   html += `<div class="card" style="margin-top:14px;">
     <div class="card-title">🧯 الإبطال والمخاطر</div>
     ${a.invalidation ? '<div class="smc-zone-note">❌ <b>يُبطل الفكرة:</b> ' + escapeSMC(a.invalidation) + '</div>' : ''}
-    ${(a.cancelConditions||[]).length ? '<div class="market-section-title">شروط الإلغاء</div>' + list(a.cancelConditions) : ''}
-    ${(a.riskFactors||[]).length ? '<div class="market-section-title">عوامل الخطر</div>' + list(a.riskFactors) : ''}
-    ${(a.conflictingEvidence||[]).length ? '<div class="market-section-title">أدلة معاكسة</div>' + list(a.conflictingEvidence) : ''}
-    ${(a.warnings||[]).length ? '<div class="market-section-title">تنبيهات القراءة</div>' + list(a.warnings) : ''}
+    ${(a.riskFactors||[]).length ? '<div class="market-section-title">عوامل الخطر</div>' + listTop(a.riskFactors, 3) : ''}
+    ${(a.cancelConditions||[]).length || (a.conflictingEvidence||[]).length || (a.warnings||[]).length ? `
+      <details style="margin-top:10px;">
+        <summary style="cursor:pointer; font-size:12px; color:var(--text-dim); padding:6px 2px;">تفاصيل إضافية (شروط الإلغاء، أدلة معاكسة، تنبيهات القراءة)</summary>
+        ${(a.cancelConditions||[]).length ? '<div class="market-section-title">شروط الإلغاء</div>' + list(a.cancelConditions) : ''}
+        ${(a.conflictingEvidence||[]).length ? '<div class="market-section-title">أدلة معاكسة</div>' + list(a.conflictingEvidence) : ''}
+        ${(a.warnings||[]).length ? '<div class="market-section-title">تنبيهات القراءة</div>' + list(a.warnings) : ''}
+      </details>` : ''}
   </div>`;
 
   /* ---- الشفافية: مين وافق ومين رفض ---- */
@@ -2214,90 +2229,6 @@ function renderImgAnalysisResult(a){
   </div>`;
 
   el.innerHTML = html;
-}
-
-/* بطاقة الرافعة والخسارة والربح.
-   كل مبلغ بالدولار بيتناسب خطياً مع رأس المال، والرافعة مستقلة عنه تماماً
-   (بتعتمد على مسافة الوقف بس) — فإعادة الحساب بالمتصفح دقيقة مش تقريب. */
-function renderPositionCard(a){
-  const p = a.position;
-  const equity = getSavedEquity();
-
-  const capitalRow = `<div class="form-row" style="margin-bottom:12px;">
-    <label>رأس مالك (لحساب الرافعة والخسارة)</label>
-    <input type="number" id="imgEquityInput" class="ltr" min="1" step="any" value="${equity}"
-           oninput="onImgEquityChange(this.value)">
-  </div>`;
-
-  if(!p){
-    return `<div class="card-title">💰 حجم المركز</div>${capitalRow}
-      <div class="smc-zone-note">— ما في مستويات لحساب المركز.</div>`;
-  }
-
-  if(p.tradable === false){
-    return `<div class="card-title">💰 حجم المركز</div>${capitalRow}
-      <div class="smc-zone-note" style="border-color:var(--red);">
-        🚫 <b>الإعداد مرفوض حسب سياسة المخاطرة:</b> ${escapeSMC(p.detail || p.reason || '')}
-      </div>`;
-  }
-
-  /* k = نسبة رأس المال الجديد لرأس المال يلي انحسبت عليه النتيجة */
-  const k = p.equity > 0 ? equity / p.equity : 1;
-  const row = (label, value)=> `<div class="smc-sugg-mini"><div class="smc-sugg-mini-label">${label}</div><div class="smc-sugg-mini-value">${value}</div></div>`;
-
-  const tps = (p.targets || []).map(t => `
-    <div class="smc-sugg-mini">
-      <div class="smc-sugg-mini-label">${t.label} · <span class="ltr">${t.price}</span> · RR 1:${t.rr}</div>
-      <div class="smc-sugg-mini-value" style="color:var(--green);">
-        <span class="ltr">${fmtSignedUsd('+', t.profitUsd * k)}</span>
-        <span style="opacity:.7; font-size:11.5px;">(${fmtPct(t.profitPctOfEquity)} من رأس المال)</span>
-      </div>
-    </div>`).join('');
-
-  return `<div class="card-title">💰 الرافعة وحجم المركز</div>
-    ${capitalRow}
-    <div class="smc-sugg-grid">
-      ${row('الرافعة', '<span class="ltr" style="font-weight:800;">' + p.leverage + 'x</span>' + (p.isSpot ? ' <span style="opacity:.6;font-size:11px;">(سبوت)</span>' : ''))}
-      ${row('الهامش المستخدم', '<span class="ltr">' + fmtUsd(p.marginUsd * k) + '</span>')}
-      ${row('حجم الصفقة', '<span class="ltr">' + fmtUsd(p.notionalUsd * k) + '</span>')}
-      ${row('الكمية', '<span class="ltr">' + (p.quantity * k).toFixed(6) + '</span>')}
-      ${row('مسافة الوقف', '<span class="ltr">' + fmtPct(p.stopDistancePct) + '</span>')}
-      ${row('العائد/المخاطرة (TP1)', '<span class="ltr">1:' + p.rrFirstTarget + '</span>')}
-    </div>
-
-    <div class="market-section-title">لو ضرب الوقف</div>
-    <div class="smc-sugg-grid">
-      ${row('الخسارة', '<span class="ltr" style="color:var(--red); font-weight:800;">' + fmtSignedUsd('-', p.lossUsd * k) + '</span>')}
-      ${row('من رأس المال', '<span class="ltr" style="color:var(--red);">' + fmtPct(p.lossPctOfEquity) + '</span>')}
-      ${row('من الهامش', '<span class="ltr" style="color:var(--red);">' + fmtPct(p.lossPctOfMargin) + '</span>')}
-    </div>
-
-    <div class="market-section-title">لو وصل الأهداف</div>
-    <div class="smc-sugg-grid">${tps || '<div class="smc-zone-note" style="opacity:.6;">— ما في أهداف محسوبة</div>'}</div>
-
-    ${p.meetsPolicyRR === false ? '<div class="smc-zone-note" style="margin-top:10px; border-color:var(--amber);">⚠️ الهدف الأول تحت الحد الأدنى للعائد/المخاطرة بالسياسة (1:' + (p.policy ? p.policy.minRR : '') + ').</div>' : ''}
-    <div class="smc-zone-note" style="margin-top:10px; opacity:.8;">
-      السياسة: هامش ${p.policy ? p.policy.marginPctOfEquity : ''}% من رأس المال، وأقصى خسارة ${p.policy ? p.policy.maxLossPctOfEquity : ''}% منه.
-      الرافعة <b>ناتج</b> مسافة الوقف مش خيار — وما بتتغيّر لما تغيّر رأس مالك.
-    </div>`;
-}
-
-function onImgEquityChange(value){
-  const v = Number(value);
-  if(!isFinite(v) || v <= 0) return;
-  setSavedEquity(v);
-  const card = document.getElementById('imgPositionCard');
-  if(!card || !lastImgAnalysis) return;
-  /* منحدّث الأرقام بس، وما منلمس خانة الإدخال عشان ما يطير المؤشر. */
-  const input = document.getElementById('imgEquityInput');
-  const caret = input ? input.selectionStart : null;
-  card.innerHTML = renderPositionCard(lastImgAnalysis);
-  const fresh = document.getElementById('imgEquityInput');
-  if(fresh){
-    fresh.value = value;
-    fresh.focus();
-    try{ fresh.setSelectionRange(caret, caret); }catch(e){}
-  }
 }
 
 function applyImgAnalysisToCalculator(){
