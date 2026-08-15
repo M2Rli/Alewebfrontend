@@ -2134,6 +2134,7 @@ function renderImgAnalysisResult(a){
       <div class="card-title">${planTitle}${a.setupType ? ' — ' + escapeSMC(a.setupType) : ''}</div>
       <div class="smc-sugg-grid">
         ${row('منطقة الدخول', a.entry && a.entry.from != null ? '<span class="ltr">'+a.entry.from+' – '+a.entry.to+'</span>' : '—')}
+        ${a.entryPrice != null ? row('سعر الأمر (limit)', '<span class="ltr" style="font-weight:800; color:var(--purple-glow);">'+a.entryPrice+'</span>') : ''}
         ${row('وقف الخسارة', num(a.stopLoss))}
         ${row('TP1', num(a.targets.tp1))}
         ${row('TP2', num(a.targets.tp2))}
@@ -2164,7 +2165,7 @@ function renderImgAnalysisResult(a){
   if(hasPlan && (a.confirmationRequired||[]).length){
     const dirAr = a.direction === 'SHORT' ? 'بيع' : 'شراء';
     const bottomLine = a.state === 'TRADE_SOON'
-      ? `استنّى السعر يوصل <span class="ltr" style="color:var(--amber);font-weight:800;">${a.triggerPrice ?? '—'}</span> ← بعدها ${dirAr} · وقف <span class="ltr">${a.stopLoss ?? '—'}</span> · أول هدف <span class="ltr">${a.targets.tp1 ?? '—'}</span>`
+      ? `استنّى السعر يوصل <span class="ltr" style="color:var(--amber);font-weight:800;">${a.triggerPrice ?? '—'}</span> ← حُطّ أمر ${dirAr} عند <span class="ltr" style="font-weight:800;">${a.entryPrice ?? a.triggerPrice ?? '—'}</span> · وقف <span class="ltr">${a.stopLoss ?? '—'}</span> · أول هدف <span class="ltr">${a.targets.tp1 ?? '—'}</span>`
       : `${dirAr} الآن من <span class="ltr">${a.entry.from} – ${a.entry.to}</span> · وقف <span class="ltr">${a.stopLoss ?? '—'}</span> · أول هدف <span class="ltr">${a.targets.tp1 ?? '—'}</span>`;
 
     html += `<div class="card" style="margin-top:14px;">
