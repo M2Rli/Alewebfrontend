@@ -3,14 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>حاسبة حجم الصفقة — THE OP</title>
+<title>THE OP — مساحة عمل المتداول</title>
 <meta name="description" content="حاسبة احترافية لحجم الصفقة وإدارة رأس المال، مع تحليل صورة الشارت بالذكاء الاصطناعي وأسعار السوق اللحظية.">
-<meta name="theme-color" content="#040a12">
+<meta name="theme-color" content="#0c100f">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 42 42'%3E%3Crect x='6' y='18' width='4' height='16' rx='1' fill='%23ff5c7a'/%3E%3Crect x='15' y='9' width='4' height='22' rx='1' fill='%2322d3ee'/%3E%3Crect x='24' y='14' width='4' height='12' rx='1' fill='%2322d3ee'/%3E%3Crect x='33' y='6' width='4' height='24' rx='1' fill='%2334d399'/%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 42 42'%3E%3Crect width='42' height='42' rx='8' fill='%23040a12'/%3E%3Crect x='6' y='18' width='4' height='16' rx='1' fill='%23ff5c7a'/%3E%3Crect x='15' y='9' width='4' height='22' rx='1' fill='%2322d3ee'/%3E%3Crect x='24' y='14' width='4' height='12' rx='1' fill='%2322d3ee'/%3E%3Crect x='33' y='6' width='4' height='24' rx='1' fill='%2334d399'/%3E%3C/svg%3E">
 <meta name="color-scheme" content="dark">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./assets/fonts/fonts.css">
 <style>
   :root{
     --bg-void:#040a12;
@@ -18,11 +17,11 @@
     --bg-panel-2:#0b1d2b;
     --bg-panel-3:#12324a;
     --purple-deep:#0a3b4d;
-    --purple:#0ea5c4;
-    --purple-bright:#22d3ee;
-    --purple-glow:#a9f2ff;
-    --border:rgba(34,211,238,0.16);
-    --border-strong:rgba(34,211,238,0.36);
+    --purple:#79b797;
+    --purple-bright:#c4ed98;
+    --purple-glow:#ddf3c5;
+    --border:rgba(196,237,152,0.16);
+    --border-strong:rgba(196,237,152,0.36);
     --text:#dcf2fb;
     --text-muted:#7fa9be;
     --text-dim:#557c90;
@@ -38,20 +37,6 @@
   body{ touch-action:pan-y; overscroll-behavior-x:none; }
   .ltr{direction:ltr; unicode-bidi:isolate; font-family:'JetBrains Mono',monospace;}
 
-  /* ================= 3D BACKGROUND ================= */
-  #bg3d{
-    position:fixed; inset:0; width:100%; height:100%; display:block;
-    z-index:0; pointer-events:none; opacity:0; transition:opacity 1.2s ease;
-  }
-  #bg3d.ready{opacity:.72;}
-  .bg-scrim{
-    position:fixed; inset:0; z-index:1; pointer-events:none;
-    background:
-      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(14,165,196,0.18), transparent 60%),
-      radial-gradient(ellipse 700px 550px at 100% 6%, rgba(14,165,196,0.13), transparent 60%),
-      linear-gradient(180deg, rgba(4,10,18,0.20) 0%, rgba(4,10,18,0.46) 55%, rgba(4,10,18,0.74) 100%);
-  }
-
   /* ================= DASHBOARD SHELL ================= */
   .app{
     position:relative; z-index:2;
@@ -62,11 +47,11 @@
     position:sticky; top:22px; padding:20px 16px; border-radius:22px;
     background:linear-gradient(168deg, rgba(28,23,18,.86), rgba(19,16,9,.92));
     border:1px solid var(--border-strong);
-    box-shadow:0 26px 56px -28px rgba(14,165,196,.6), inset 0 1px 0 rgba(255,255,255,.05);
+    box-shadow:0 26px 56px -28px rgba(121,183,151,.6), inset 0 1px 0 rgba(255,255,255,.05);
     backdrop-filter:blur(16px) saturate(1.15);
   }
   .side-brand{display:flex; align-items:center; gap:11px; padding:2px 8px 16px; border-bottom:1px solid var(--border);}
-  .side-brand svg{width:30px; height:30px; flex-shrink:0; filter:drop-shadow(0 0 10px rgba(34,211,238,.5));}
+  .side-brand svg{width:30px; height:30px; flex-shrink:0; filter:drop-shadow(0 0 10px rgba(196,237,152,.5));}
   .side-brand-txt{display:flex; flex-direction:column; gap:2px; min-width:0;}
   .side-brand-name{
     font-family:'JetBrains Mono',monospace; font-weight:700; font-size:17px; letter-spacing:3px;
@@ -77,7 +62,7 @@
   .side-label{font-size:10px; font-weight:800; color:var(--text-dim); letter-spacing:1.6px; padding:16px 10px 8px;}
   .side-foot{
     margin-top:16px; padding:12px 13px; border-radius:13px; font-size:11.5px; line-height:1.85;
-    color:var(--purple-glow); background:rgba(34,211,238,.07); border:1px solid var(--border);
+    color:var(--purple-glow); background:rgba(196,237,152,.07); border:1px solid var(--border);
   }
 
   .main{min-width:0;}
@@ -94,7 +79,7 @@
   .subtitle{text-align:center; color:var(--text-muted); font-size:13px; margin-bottom:14px;}
   .mission-strip{
     text-align:center; font-size:12.5px; font-weight:700; color:var(--purple-glow);
-    background:linear-gradient(90deg, transparent, rgba(34,211,238,0.10), transparent);
+    background:linear-gradient(90deg, transparent, rgba(196,237,152,0.10), transparent);
     border-top:1px solid var(--border); border-bottom:1px solid var(--border);
     padding:10px 14px; margin-bottom:26px; line-height:1.6;
   }
@@ -102,18 +87,18 @@
   .card{
     background:linear-gradient(165deg, var(--bg-panel-2), var(--bg-panel));
     border:1px solid var(--border); border-radius:18px; padding:24px;
-    box-shadow:0 16px 40px -20px rgba(14,165,196,0.5), inset 0 1px 0 rgba(255,255,255,0.04), inset 0 0 0 1px rgba(255,255,255,0.015);
+    box-shadow:0 16px 40px -20px rgba(121,183,151,0.5), inset 0 1px 0 rgba(255,255,255,0.04), inset 0 0 0 1px rgba(255,255,255,0.015);
     margin-bottom:18px; backdrop-filter:blur(14px) saturate(1.1);
     transition:box-shadow .3s cubic-bezier(.2,.8,.2,1), border-color .3s cubic-bezier(.2,.8,.2,1), transform .3s cubic-bezier(.2,.8,.2,1);
   }
   .card:hover{
     border-color:var(--border-strong); transform:translateY(-1px);
-    box-shadow:0 24px 54px -18px rgba(14,165,196,0.7), inset 0 1px 0 rgba(255,255,255,0.06), inset 0 0 0 1px rgba(255,255,255,0.02);
+    box-shadow:0 24px 54px -18px rgba(121,183,151,0.7), inset 0 1px 0 rgba(255,255,255,0.06), inset 0 0 0 1px rgba(255,255,255,0.02);
   }
   .card-title{font-size:15px; font-weight:800; color:var(--purple-glow); margin-bottom:16px; display:flex; align-items:center; gap:8px; letter-spacing:.2px;}
 
   .rule-box{
-    background:rgba(34,211,238,0.08); border:1px solid var(--border); border-radius:12px;
+    background:rgba(196,237,152,0.08); border:1px solid var(--border); border-radius:12px;
     padding:14px 16px; margin-bottom:22px; font-size:13px; color:var(--text-muted); line-height:2;
   }
   .rule-box b{color:var(--purple-glow);}
@@ -125,7 +110,7 @@
     padding:15px 16px; border-radius:12px; font-family:'JetBrains Mono',monospace; font-size:17px;
     direction:ltr; text-align:left; transition:border-color .2s ease, box-shadow .2s ease;
   }
-  .form-row input:focus{outline:none; border-color:var(--purple-bright); box-shadow:0 0 0 4px rgba(34,211,238,0.12), inset 0 1px 3px rgba(0,0,0,0.3);}
+  .form-row input:focus{outline:none; border-color:var(--purple-bright); box-shadow:0 0 0 4px rgba(196,237,152,0.12), inset 0 1px 3px rgba(0,0,0,0.3);}
   .form-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
 
   .step-num{
@@ -149,12 +134,12 @@
     background:var(--bg-void); color:var(--text-muted); font-weight:700; font-size:13.5px; cursor:pointer;
     transition:.2s cubic-bezier(.2,.8,.2,1);
   }
-  .asset-opt.selected{border-color:var(--purple-bright); background:rgba(34,211,238,0.12); color:var(--purple-glow); box-shadow:0 6px 16px -8px rgba(34,211,238,0.45);}
+  .asset-opt.selected{border-color:var(--purple-bright); background:rgba(196,237,152,0.12); color:var(--purple-glow); box-shadow:0 6px 16px -8px rgba(196,237,152,0.45);}
 
   .lev-box{
     background:linear-gradient(160deg, var(--bg-panel-3), var(--bg-panel-2)); border:1.5px solid var(--border-strong);
     border-radius:14px; padding:16px; margin-top:14px;
-    box-shadow:inset 0 1px 0 rgba(255,255,255,0.04), 0 10px 30px -18px rgba(14,165,196,0.5);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.04), 0 10px 30px -18px rgba(121,183,151,0.5);
   }
   .lev-title{font-size:13px; font-weight:800; color:var(--purple-glow); margin-bottom:10px;}
   .lev-main{
@@ -165,7 +150,7 @@
   .lev-warn{color:var(--red); font-weight:700;}
 
   .journal-add-btn{margin-top:14px; background:var(--bg-panel-3); border:1.5px solid var(--border-strong); color:var(--purple-glow);}
-  .journal-add-btn:hover{background:rgba(34,211,238,0.12);}
+  .journal-add-btn:hover{background:rgba(196,237,152,0.12);}
   .share-card-btn{margin-top:10px; background:linear-gradient(135deg, var(--purple-bright), var(--purple)); color:#032430;}
 
   .img-modal{
@@ -194,7 +179,7 @@
   .journal-line1{font-size:13px; font-weight:700; color:var(--text); display:flex; align-items:center; gap:6px; flex-wrap:wrap;}
   .journal-line2{font-size:11.5px; color:var(--text-dim); margin-top:3px; font-family:'JetBrains Mono',monospace;}
   .journal-badge{font-size:10.5px; font-weight:800; padding:3px 9px; border-radius:100px;}
-  .journal-badge.open{background:rgba(34,211,238,0.14); color:var(--purple-glow);}
+  .journal-badge.open{background:rgba(196,237,152,0.14); color:var(--purple-glow);}
   .journal-badge.win{background:var(--green-dim); color:var(--green);}
   .journal-badge.loss{background:var(--red-dim); color:var(--red);}
   .journal-badge.breakeven{background:var(--bg-panel-3); color:var(--text-muted);}
@@ -223,10 +208,10 @@
   .btn{
     width:100%; font-family:inherit; font-weight:800; font-size:15px; padding:14px; border-radius:12px;
     border:none; cursor:pointer; background:linear-gradient(135deg, var(--purple-bright), var(--purple));
-    color:#032430; box-shadow:0 12px 30px -10px rgba(14,165,196,0.7);
+    color:#032430; box-shadow:0 12px 30px -10px rgba(121,183,151,0.7);
     transition:filter .2s cubic-bezier(.2,.8,.2,1), transform .15s cubic-bezier(.2,.8,.2,1), box-shadow .2s ease;
   }
-  .btn:hover{filter:brightness(1.1); transform:translateY(-1px); box-shadow:0 16px 36px -10px rgba(14,165,196,0.8);}
+  .btn:hover{filter:brightness(1.1); transform:translateY(-1px); box-shadow:0 16px 36px -10px rgba(121,183,151,0.8);}
   .btn:active{transform:translateY(0) scale(.98); filter:brightness(.97);}
 
   .result{display:none; margin-top:22px;}
@@ -256,7 +241,7 @@
   .result-mini-dollar{font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; margin-top:4px; opacity:.85;}
   .capital-hint{
     margin-top:9px; font-size:13px; color:var(--purple-glow); font-weight:700;
-    background:rgba(34,211,238,0.08); border:1px solid var(--border); border-radius:10px; padding:10px 13px;
+    background:rgba(196,237,152,0.08); border:1px solid var(--border); border-radius:10px; padding:10px 13px;
     display:none;
   }
   .capital-hint.show{display:block;}
@@ -292,7 +277,7 @@
   .news-item-top{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px;}
   .news-currency-badge{
     font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:800; color:var(--purple-glow);
-    background:rgba(34,211,238,0.1); border:1px solid var(--border); padding:2px 8px; border-radius:6px; flex-shrink:0;
+    background:rgba(196,237,152,0.1); border:1px solid var(--border); padding:2px 8px; border-radius:6px; flex-shrink:0;
   }
   .news-impact-badge{
     font-size:10.5px; font-weight:800; padding:3px 9px; border-radius:100px; flex-shrink:0; white-space:nowrap;
@@ -308,7 +293,7 @@
     width:100%; overflow:hidden; position:relative; display:flex; align-items:stretch;
     background:linear-gradient(180deg, var(--bg-panel-2), var(--bg-void));
     border-bottom:1px solid var(--border-strong);
-    box-shadow:0 6px 24px -10px rgba(14,165,196,0.35);
+    box-shadow:0 6px 24px -10px rgba(121,183,151,0.35);
   }
   .mkt-ticker::before, .mkt-ticker::after{
     content:''; position:absolute; top:0; bottom:0; width:60px; z-index:3; pointer-events:none;
@@ -352,7 +337,7 @@
   .watch-status.calm{background:var(--green-dim); color:var(--green); border:1px solid rgba(52,211,153,0.35);}
   .watch-status.alert{background:var(--red-dim); color:var(--red); border:1px solid rgba(248,113,113,0.35);}
   .session-info{
-    background:rgba(34,211,238,0.08); border:1px solid var(--border); border-radius:10px;
+    background:rgba(196,237,152,0.08); border:1px solid var(--border); border-radius:10px;
     padding:10px 13px; font-size:12.5px; color:var(--text-muted); margin-bottom:12px; line-height:1.8;
   }
 
@@ -370,7 +355,7 @@
   .page-tab.active{
     background:linear-gradient(135deg, var(--purple-glow), var(--purple-bright) 55%, var(--purple));
     border-color:transparent; color:#032430; font-weight:800;
-    box-shadow:0 12px 26px -10px rgba(34,211,238,0.75);
+    box-shadow:0 12px 26px -10px rgba(196,237,152,0.75);
   }
   .view{display:none;}
   .view.active{display:block; animation:fadein .25s ease;}
@@ -448,7 +433,7 @@
     flex:1; text-align:center; padding:10px; border-radius:10px; border:1px solid var(--border);
     background:var(--bg-void); color:var(--text-muted); font-size:13px; font-weight:700; cursor:pointer;
   }
-  .report-tab-btn.active{border-color:var(--purple-bright); background:rgba(34,211,238,0.12); color:var(--purple-glow);}
+  .report-tab-btn.active{border-color:var(--purple-bright); background:rgba(196,237,152,0.12); color:var(--purple-glow);}
   .report-stats-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:18px;}
   .report-day-bar{display:flex; align-items:center; gap:10px; margin-bottom:8px; font-size:12.5px;}
   .report-day-label{width:60px; color:var(--text-muted); flex-shrink:0;}
@@ -472,7 +457,7 @@
     background:var(--bg-panel-2); color:var(--text-muted); font-size:12.5px; font-weight:700; cursor:pointer; transition:.15s;
   }
   .smc-style-opt span{display:block; font-size:10.5px; font-weight:500; color:var(--text-dim); margin-top:3px;}
-  .smc-style-opt.selected{border-color:var(--purple-bright); background:rgba(34,211,238,0.12); color:var(--purple-glow);}
+  .smc-style-opt.selected{border-color:var(--purple-bright); background:rgba(196,237,152,0.12); color:var(--purple-glow);}
   .smc-style-opt.selected span{color:var(--purple-glow); opacity:.8;}
   .smc-quickpicks{display:flex; flex-wrap:wrap; gap:8px; margin:-6px 0 18px;}
   .smc-chip{
@@ -491,7 +476,7 @@
   .smc-suggestion{
     background:linear-gradient(160deg, var(--bg-panel-3), var(--bg-panel-2)); border:1.5px solid var(--border-strong);
     border-radius:14px; padding:16px;
-    box-shadow:0 18px 40px -22px rgba(34,211,238,0.55);
+    box-shadow:0 18px 40px -22px rgba(196,237,152,0.55);
   }
   .img-drop{
     border:2px dashed var(--border-strong); border-radius:14px; padding:28px 16px; text-align:center;
@@ -508,82 +493,8 @@
     font-size:12px; color:var(--text-muted); background:var(--bg-void); border:1px solid var(--border);
     border-radius:10px; padding:9px 12px; margin-top:8px; line-height:1.7;
   }
-  /* ================= LANDING SPLASH ================= */
-  #landing{
-    position:fixed; inset:0; z-index:2000; overflow:hidden;
-    background:radial-gradient(ellipse 900px 700px at 50% 30%, rgba(14,165,196,0.16), transparent 65%), var(--bg-void);
-    display:flex; align-items:center; justify-content:center;
-    transition:opacity .6s ease, visibility .6s ease;
-  }
-  #landing.hidden{opacity:0; visibility:hidden; pointer-events:none;}
-
-  .float-arrow{
-    position:absolute; bottom:-60px; font-family:'JetBrains Mono',monospace; font-weight:800;
-    animation-name:floatUp; animation-timing-function:linear; animation-iteration-count:infinite;
-    user-select:none; pointer-events:none;
-  }
-  .float-arrow.up{color:var(--green); text-shadow:0 0 14px rgba(52,211,153,0.6);}
-  .float-arrow.down{color:var(--red); text-shadow:0 0 14px rgba(248,113,113,0.55);}
-  @keyframes floatUp{
-    0%{ transform:translateY(0) rotate(0deg); opacity:0; }
-    12%{ opacity:.85; }
-    85%{ opacity:.7; }
-    100%{ transform:translateY(-115vh) rotate(8deg); opacity:0; }
-  }
-
-  .landing-content{position:relative; z-index:2; text-align:center; padding:0 24px;}
-  .landing-logo{width:76px; height:76px; margin-bottom:18px; filter:drop-shadow(0 0 24px rgba(34,211,238,0.55)); animation:logoPulse 3s ease-in-out infinite;}
-  @keyframes logoPulse{0%,100%{transform:scale(1);} 50%{transform:scale(1.06);}}
-
-  .landing-title{font-family:'JetBrains Mono',monospace; font-weight:800; font-size:44px; letter-spacing:8px; margin-bottom:14px;}
-  .landing-letter{
-    display:inline-block; opacity:0; transform:translateY(24px) rotateX(70deg);
-    animation:letterIn .55s cubic-bezier(.2,.8,.2,1) forwards;
-    background:linear-gradient(180deg, var(--purple-glow), var(--purple-bright) 55%, var(--purple));
-    -webkit-background-clip:text; background-clip:text; color:transparent;
-  }
-  @keyframes letterIn{ to{opacity:1; transform:translateY(0) rotateX(0);} }
-
-  .landing-tagline{
-    font-size:17px; font-weight:800; color:var(--purple-glow); margin-bottom:16px; letter-spacing:.3px;
-    opacity:0; animation:fadeUp .7s ease .55s forwards;
-  }
-
-  .landing-sub{
-    font-size:14.5px; color:var(--text-muted); line-height:1.9; margin-bottom:26px; max-width:480px;
-    margin-left:auto; margin-right:auto;
-    opacity:0; animation:fadeUp .8s ease .8s forwards;
-  }
-  .landing-sub-strong{color:#fff; font-weight:700;}
-  @keyframes fadeUp{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
-
-  .landing-pillars{
-    display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin-bottom:30px;
-    opacity:0; animation:fadeUp .8s ease 1.05s forwards;
-  }
-  .landing-pillar{
-    font-size:12px; font-weight:700; color:var(--text); background:rgba(34,211,238,0.08);
-    border:1px solid var(--border); padding:8px 14px; border-radius:100px; white-space:nowrap;
-  }
-
-  .landing-enter{
-    opacity:0; animation:fadeUp .8s ease 1.3s forwards;
-    font-family:inherit; font-weight:800; font-size:15px; letter-spacing:.5px;
-    padding:15px 46px; border-radius:100px; border:none; cursor:pointer;
-    background:linear-gradient(135deg, var(--purple-glow), var(--purple-bright) 55%, var(--purple)); color:#032430;
-    box-shadow:0 16px 40px -12px rgba(34,211,238,0.8);
-    transition:transform .2s, box-shadow .2s;
-  }
-  .landing-enter:hover{transform:translateY(-2px); box-shadow:0 20px 46px -12px rgba(34,211,238,0.95);}
-
-  @media (max-width:520px){
-    .landing-title{font-size:30px; letter-spacing:5px;}
-    .landing-logo{width:60px; height:60px;}
-    .landing-tagline{font-size:15px;}
-    .landing-sub{font-size:13.5px;}
-    .landing-pillar{font-size:11px; padding:7px 12px;}
-  }
 </style>
+<link rel="stylesheet" href="./experience.css">
 
 <!-- Backend origin, Supabase auth, and the account/subscription UI. Loaded
      before the page script so window.apiFetch exists by the time it runs. -->
@@ -591,83 +502,77 @@
 <script type="module" src="./app-auth.js"></script>
 </head>
 <body>
-<canvas id="bg3d" aria-hidden="true"></canvas>
+<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute" aria-hidden="true"><defs><symbol id="i-logo" viewBox="0 0 24 24"><path d="M4 17V9m5 11V4m6 13V7m5 7V2"/><path d="M2 12h4m1-4h4m2 4h4m1-6h4"/></symbol><symbol id="i-home" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol><symbol id="i-calc" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="3"/><path d="M8 6h8M8 11h1m5 0h2m-8 4h1m5 0h2m-8 4h1m5 0h2"/></symbol><symbol id="i-scan" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m13-5h3a2 2 0 0 1 2 2v3M3 16v3a2 2 0 0 0 2 2h3m8 0h3a2 2 0 0 0 2-2v-3M2 12h20M7 8v2m5-4v4m5-3v3m-10 4v3m5-3v5m5-5v2"/></symbol><symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18M7 15l4-5 4 3 6-9"/></symbol><symbol id="i-pulse" viewBox="0 0 24 24"><path d="M2 12h5l3-8 4 16 3-8h5"/></symbol><symbol id="i-shield" viewBox="0 0 24 24"><path d="m12 2 8 3v6c0 5-4 9-8 11-4-2-8-6-8-11V5l8-3Z"/><path d="m8 12 3 3 5-6"/></symbol><symbol id="i-report" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="19" rx="2"/><path d="M8 16v2m4-6v6m4-10v10M8 6h4"/></symbol><symbol id="i-arrow" viewBox="0 0 24 24"><path d="M19 12H5m6-6-6 6 6 6"/></symbol><symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></symbol><symbol id="i-play" viewBox="0 0 24 24"><path d="m8 4 12 8-12 8V4Z"/></symbol><symbol id="i-chevron" viewBox="0 0 24 24"><path d="m14 7-5 5 5 5"/></symbol><symbol id="i-upload" viewBox="0 0 24 24"><path d="M4 16v4h16v-4M12 16V3m-5 5 5-5 5 5"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol><symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></symbol></defs></svg>
+<a class="skip-link" href="#mainContent">انتقل للمحتوى</a>
 <div class="bg-scrim" aria-hidden="true"></div>
-
-<div id="landing">
-  <div class="float-arrows" id="floatArrows"></div>
-  <div class="landing-content">
-    <svg class="landing-logo" viewBox="0 0 42 42" fill="none">
-      <rect x="6" y="18" width="4" height="16" rx="1" fill="#ff5c7a"/>
-      <rect x="15" y="9" width="4" height="22" rx="1" fill="#22d3ee"/>
-      <rect x="24" y="14" width="4" height="12" rx="1" fill="#22d3ee"/>
-      <rect x="33" y="6" width="4" height="24" rx="1" fill="#34d399"/>
-    </svg>
-    <div class="landing-title ltr" id="landingTitle"></div>
-    <div class="landing-tagline">حماية رأس مالك أهم من أي صفقة</div>
-    <div class="landing-sub">
-      معظم المتداولين ما بيخسروا فلوسهم لأنهم ما يعرفوا يحللوا —
-      بيخسروها لأنهم ما بيديروا رأس مالهم صح.<br>
-      <span class="landing-sub-strong">THE OP بيوقف هالنزيف قبل ما يصير.</span>
-    </div>
-    <div class="landing-pillars">
-      <div class="landing-pillar">🛡️ حماية رأس المال أولاً</div>
-      <div class="landing-pillar">📐 حسابات دقيقة، مش تخمين</div>
-      <div class="landing-pillar">🚫 صفر عواطف بقرارك</div>
-    </div>
-    <button class="landing-enter" onclick="enterLanding()">ابدأ تحمي رأس مالك الآن</button>
-  </div>
-</div>
-
-<div class="mkt-ticker" id="tickerWrap">
-  <span class="mkt-live"><span class="mkt-live-dot"></span> LIVE</span>
-  <div class="mkt-viewport">
-    <div class="mkt-track" id="tickerTrack"></div>
-  </div>
-</div>
 
 <div class="app">
   <aside class="sidebar">
-    <div class="side-brand">
-      <svg viewBox="0 0 42 42" fill="none" aria-hidden="true">
-        <rect x="6" y="18" width="4" height="16" rx="1" fill="#ff5c7a"/>
-        <rect x="15" y="9" width="4" height="22" rx="1" fill="#22d3ee"/>
-        <rect x="24" y="14" width="4" height="12" rx="1" fill="#22d3ee"/>
-        <rect x="33" y="6" width="4" height="24" rx="1" fill="#34d399"/>
-      </svg>
-      <span class="side-brand-txt">
-        <span class="side-brand-name ltr">THE OP</span>
-        <span class="side-brand-sub">إدارة رأس المال والمخاطر</span>
-      </span>
-    </div>
+    <a class="side-brand" href="#home" onclick="switchPage('home');return false;" aria-label="THE OP — الرئيسية">
+      <span class="brand-mark"><svg class="op-icon " aria-hidden="true"><use href="#i-logo"/></svg></span>
+      <span class="side-brand-txt"><span class="side-brand-name ltr">THE OP<span style="color:var(--purple-bright)">.</span></span><span class="side-brand-sub">TRADING WORKSPACE</span></span>
+    </a>
 
-    <div class="side-label">الأقسام</div>
-    <nav class="page-tabs" id="pageTabs">
-      <button class="page-tab active" data-page="calc" onclick="switchPage('calc')"><span class="tab-ico">🧮</span>الحاسبة</button>
-      <button class="page-tab" data-page="imgchart" onclick="switchPage('imgchart')"><span class="tab-ico">📷</span>تحليل صورة</button>
-      <button class="page-tab" data-page="prices" onclick="switchPage('prices')"><span class="tab-ico">💱</span>الأسعار والأخبار</button>
-      <button class="page-tab" data-page="pulse" onclick="switchPage('pulse')"><span class="tab-ico">📊</span>نبض السوق</button>
-      <button class="page-tab" data-page="limit" onclick="switchPage('limit')"><span class="tab-ico">🛑</span>حد الخسارة</button>
-      <button class="page-tab" data-page="report" onclick="switchPage('report')"><span class="tab-ico">🗂️</span>التقرير</button>
+    <div class="side-label">مساحة العمل</div>
+    <nav class="page-tabs" id="pageTabs" aria-label="أدوات التداول">
+      <button type="button" class="page-tab active" data-page="home" aria-current="page" onclick="switchPage('home')"><span class="tab-ico"><svg class="op-icon " aria-hidden="true"><use href="#i-home"/></svg></span>نظرة عامة</button>
+      <button type="button" class="page-tab" data-page="calc"  onclick="switchPage('calc')"><span class="tab-ico"><svg class="op-icon " aria-hidden="true"><use href="#i-calc"/></svg></span>حاسبة الصفقات</button>
+      <button type="button" class="page-tab" data-page="imgchart"  onclick="switchPage('imgchart')"><span class="tab-ico"><svg class="op-icon " aria-hidden="true"><use href="#i-scan"/></svg></span>تحليل الشارت</button>
+      <button type="button" class="page-tab" data-page="prices"  onclick="switchPage('prices')"><span class="tab-ico"><svg class="op-icon " aria-hidden="true"><use href="#i-globe"/></svg></span>الأسعار والأخبار</button>
+      <button type="button" class="page-tab" data-page="pulse"  onclick="switchPage('pulse')"><span class="tab-ico"><svg class="op-icon " aria-hidden="true"><use href="#i-pulse"/></svg></span>نبض السوق</button>
+      <button type="button" class="page-tab" data-page="limit"  onclick="switchPage('limit')"><span class="tab-ico"><svg class="op-icon " aria-hidden="true"><use href="#i-shield"/></svg></span>حد الخسارة</button>
+      <button type="button" class="page-tab" data-page="report"  onclick="switchPage('report')"><span class="tab-ico"><svg class="op-icon " aria-hidden="true"><use href="#i-report"/></svg></span>سجل الأداء</button>
     </nav>
-
-    <div class="side-foot">🛡️ مهمتنا نوقفك قبل ما تخسر رأس مالك — مش بس نحسبلك أرباحك</div>
+    <div class="sidebar-bottom">
+      <div class="side-foot"><svg class="op-icon " aria-hidden="true"><use href="#i-shield"/></svg><b>رأس مالك، أولويتك.</b>خطة واضحة للمخاطرة قبل كل صفقة. قرارات محسوبة، بثقة أكبر.</div>
+      <div class="side-signature"><span class="signature-avatar">AD</span><span><b>بإشراف Mr Ali</b><small>THE OP · Trading Academy</small></span></div>
+    </div>
   </aside>
 
-  <div class="main">
-    <div class="main-head">
-      <h1 class="main-title" id="pageTitle">حاسبة حجم الصفقة</h1>
-      <div class="main-sub" id="pageSub">احسب حجم صفقتك وخسارتك المحتملة قبل ما تدخل السوق</div>
-    </div>
+  <main class="main" id="mainContent" tabindex="-1">
+    <header class="workspace-bar">
+      <div class="workspace-path"><span>مساحة العمل</span><svg class="op-icon " aria-hidden="true"><use href="#i-chevron"/></svg><b id="workspaceCrumb">نظرة عامة</b></div>
+      <div class="workspace-actions"><time class="workspace-time ltr" id="workspaceTime"></time><button type="button" class="motion-toggle" id="motionToggle" aria-label="إيقاف الحركة" aria-pressed="true"><svg class="op-icon " aria-hidden="true"><use href="#i-pause"/></svg></button><div id="accountSlot"></div></div>
+    </header>
+    <div class="mkt-ticker" id="tickerWrap" aria-label="أسعار الأسواق عند آخر تحديث">
+  <span class="mkt-live"><span class="mkt-live-dot"></span> الأسواق</span>
+  <div class="mkt-viewport"><div class="mkt-track" id="tickerTrack"><span class="mkt-item"><span class="mkt-sym">جاري جلب أسعار الأسواق…</span></span></div></div>
+</div>
+    <div class="main-head"><div><h1 class="main-title" id="pageTitle" tabindex="-1">مساحة عملك. أفق أوسع.</h1><p class="main-sub" id="pageSub">كل ما تحتاجه لقراءة السوق وإدارة صفقتك، في مكان واحد.</p></div><span class="page-index ltr" id="pageIndex">01 / WORKSPACE</span></div>
+    <div class="view active" id="view-home">
+      <section class="hero" aria-labelledby="heroTitle">
+        <div class="hero-copy">
+          <div class="eyebrow">BUILT FOR YOUR NEXT MOVE</div>
+          <h2 id="heroTitle">رؤية أوضح.<br><span>قرار أذكى.</span></h2>
+          <p>اقرأ الشارت، احسب مخاطرتك، وتابع أداءك.<br>مساحة مصمّمة لتبقى مركّزاً على ما يهمّك.</p>
+          <div class="hero-actions"><button type="button" class="op-button primary" onclick="switchPage('calc')">احسب صفقتك <svg class="op-icon " aria-hidden="true"><use href="#i-arrow"/></svg></button><button type="button" class="op-button" onclick="switchPage('imgchart')"><svg class="op-icon " aria-hidden="true"><use href="#i-scan"/></svg> حلّل الشارت</button></div>
+          <div class="hero-note"><svg class="op-icon " aria-hidden="true"><use href="#i-shield"/></svg> إدارة المخاطر تبدأ قبل الدخول.</div>
+        </div>
+        <div class="scene-wrap" role="img" aria-label="مجسّم شارت تداول ثلاثي الأبعاد للزينة، لا يمثل أسعاراً فعلية">
+          <div class="scene-glow"></div><div class="scene-orbit"></div>
+          <div class="scene-object" aria-hidden="true">
+            <div class="terminal"><div class="terminal-head"><span>THE OP / MARKET VISION</span><span class="terminal-dots"><i></i><i></i><i></i></span></div><div class="terminal-title"><span>BTC / USDT</span><span>ILLUSTRATION</span></div><svg class="terminal-chart" viewBox="0 0 370 160" aria-hidden="true"><defs><linearGradient id="chartArea" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#bce092" stop-opacity=".1"/><stop offset="1" stop-color="#bce092" stop-opacity="0"/></linearGradient></defs><g stroke="#c4ed98" stroke-opacity=".065"><path d="M0 30h370M0 65h370M0 100h370M0 135h370M40 0v160M100 0v160M160 0v160M220 0v160M280 0v160M340 0v160"/></g><path d="M0 135 30 116 60 124 100 93 140 107 180 78 220 85 260 52 300 58 350 15 370 21V160H0Z" fill="url(#chartArea)"/><g><path d="M26 95v44" stroke="#688271" stroke-width="1"/><rect x="22" y="105" width="8" height="22" rx="1" fill="#688271"/><path d="M30 105l3-2v22l-3 2" fill="#688271" opacity=".4"/><path d="M47 85v54" stroke="#bddd9c" stroke-width="1"/><rect x="43" y="95" width="8" height="32" rx="1" fill="#bddd9c"/><path d="M51 95l3-2v32l-3 2" fill="#bddd9c" opacity=".4"/><path d="M68 75v45" stroke="#bddd9c" stroke-width="1"/><rect x="64" y="85" width="8" height="23" rx="1" fill="#bddd9c"/><path d="M72 85l3-2v23l-3 2" fill="#bddd9c" opacity=".4"/><path d="M89 72v46" stroke="#688271" stroke-width="1"/><rect x="85" y="82" width="8" height="24" rx="1" fill="#688271"/><path d="M93 82l3-2v24l-3 2" fill="#688271" opacity=".4"/><path d="M110 65v55" stroke="#bddd9c" stroke-width="1"/><rect x="106" y="75" width="8" height="33" rx="1" fill="#bddd9c"/><path d="M114 75l3-2v33l-3 2" fill="#bddd9c" opacity=".4"/><path d="M131 58v42" stroke="#688271" stroke-width="1"/><rect x="127" y="68" width="8" height="20" rx="1" fill="#688271"/><path d="M135 68l3-2v20l-3 2" fill="#688271" opacity=".4"/><path d="M152 51v56" stroke="#bddd9c" stroke-width="1"/><rect x="148" y="61" width="8" height="34" rx="1" fill="#bddd9c"/><path d="M156 61l3-2v34l-3 2" fill="#bddd9c" opacity=".4"/><path d="M173 51v41" stroke="#688271" stroke-width="1"/><rect x="169" y="61" width="8" height="19" rx="1" fill="#688271"/><path d="M177 61l3-2v19l-3 2" fill="#688271" opacity=".4"/><path d="M194 45v52" stroke="#bddd9c" stroke-width="1"/><rect x="190" y="55" width="8" height="30" rx="1" fill="#bddd9c"/><path d="M198 55l3-2v30l-3 2" fill="#bddd9c" opacity=".4"/><path d="M215 31v52" stroke="#bddd9c" stroke-width="1"/><rect x="211" y="41" width="8" height="30" rx="1" fill="#bddd9c"/><path d="M219 41l3-2v30l-3 2" fill="#bddd9c" opacity=".4"/><path d="M236 36v44" stroke="#688271" stroke-width="1"/><rect x="232" y="46" width="8" height="22" rx="1" fill="#688271"/><path d="M240 46l3-2v22l-3 2" fill="#688271" opacity=".4"/><path d="M257 27v49" stroke="#bddd9c" stroke-width="1"/><rect x="253" y="37" width="8" height="27" rx="1" fill="#bddd9c"/><path d="M261 37l3-2v27l-3 2" fill="#bddd9c" opacity=".4"/><path d="M278 14v51" stroke="#bddd9c" stroke-width="1"/><rect x="274" y="24" width="8" height="29" rx="1" fill="#bddd9c"/><path d="M282 24l3-2v29l-3 2" fill="#bddd9c" opacity=".4"/><path d="M299 18v39" stroke="#688271" stroke-width="1"/><rect x="295" y="28" width="8" height="17" rx="1" fill="#688271"/><path d="M303 28l3-2v17l-3 2" fill="#688271" opacity=".4"/><path d="M320 7v51" stroke="#bddd9c" stroke-width="1"/><rect x="316" y="17" width="8" height="29" rx="1" fill="#bddd9c"/><path d="M324 17l3-2v29l-3 2" fill="#bddd9c" opacity=".4"/><path d="M341 1v44" stroke="#bddd9c" stroke-width="1"/><rect x="337" y="11" width="8" height="22" rx="1" fill="#bddd9c"/><path d="M345 11l3-2v22l-3 2" fill="#bddd9c" opacity=".4"/></g><path d="M0 135 30 116 60 124 100 93 140 107 180 78 220 85 260 52 300 58 350 15 370 21" fill="none" stroke="#c9e9a5" stroke-opacity=".3"/><path class="chart-glint" d="M0 135 30 116 60 124 100 93 140 107 180 78 220 85 260 52 300 58 350 15 370 21" fill="none" stroke="#e5facb" stroke-width="1.3"/></svg></div>
+            <div class="terminal-base"></div><div class="coin"><svg viewBox="0 0 36 44" aria-hidden="true"><path d="M10 9h11c9 0 9 12 0 12H10m0 0h13c10 0 10 13 0 13H10V9m5-5v5m7-5v5M15 34v6m7-6v6M6 9h4M6 34h4" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square"/></svg></div>
+            <div class="scene-chip"><svg class="op-icon " aria-hidden="true"><use href="#i-shield"/></svg><div><b>كل خطوة، محسوبة.</b><small>PLAN. PROTECT. PROGRESS.</small></div></div>
+          </div>
+          <span class="scene-caption">تصوّر بصري — ليس بيانات سوق</span>
+        </div>
+      </section>
+      <div class="section-heading"><h2>أدواتك. من التحليل إلى القرار.</h2><span>مصمّمة لطريقة تداولك</span></div>
+      <section class="tool-grid" aria-label="أدوات التداول الأساسية">
+        <button type="button" class="tool-card op-reveal" onclick="switchPage('imgchart')"><div class="tool-top"><span class="tool-icon"><svg class="op-icon " aria-hidden="true"><use href="#i-scan"/></svg></span><span class="tool-number">01</span></div><svg class="micro-art" viewBox="0 0 100 35" aria-hidden="true"><path d="M0 29 15 23 23 27 39 14 51 19 66 8 75 12 94 2" fill="none" stroke="#a6cf94" stroke-width="1.4"/><path d="M0 34h100" stroke="#a6cf94" stroke-opacity=".3"/></svg><h3>من الشارت إلى الصورة الكبيرة.</h3><p>ارفع صورة الشارت لاستكشاف الاتجاه والمناطق المهمة.</p><div class="tool-card-foot"><span>تحليل الشارت بالذكاء الاصطناعي</span><svg class="op-icon " aria-hidden="true"><use href="#i-arrow"/></svg></div></button>
+        <button type="button" class="tool-card op-reveal" onclick="switchPage('calc')"><div class="tool-top"><span class="tool-icon"><svg class="op-icon " aria-hidden="true"><use href="#i-calc"/></svg></span><span class="tool-number">02</span></div><svg class="micro-art" viewBox="0 0 100 35" aria-hidden="true"><g fill="#a6cf94"><rect x="5" y="27" width="6" height="8" rx="1" opacity="0.2"/><rect x="16" y="21" width="6" height="14" rx="1" opacity="0.30000000000000004"/><rect x="27" y="24" width="6" height="11" rx="1" opacity="0.4"/><rect x="38" y="14" width="6" height="21" rx="1" opacity="0.5"/><rect x="49" y="18" width="6" height="17" rx="1" opacity="0.6000000000000001"/><rect x="60" y="10" width="6" height="25" rx="1" opacity="0.7"/><rect x="71" y="5" width="6" height="30" rx="1" opacity="0.8"/><rect x="82" y="2" width="6" height="33" rx="1" opacity="0.9000000000000001"/></g></svg><h3>كل قرار، محسوب.</h3><p>حدّد الدخول والوقف والهدف، واعرف حجم صفقتك ومخاطرتها.</p><div class="tool-card-foot"><span>حاسبة حجم الصفقة</span><svg class="op-icon " aria-hidden="true"><use href="#i-arrow"/></svg></div></button>
+        <button type="button" class="tool-card op-reveal" onclick="switchPage('report')"><div class="tool-top"><span class="tool-icon"><svg class="op-icon " aria-hidden="true"><use href="#i-report"/></svg></span><span class="tool-number">03</span></div><svg class="micro-art" viewBox="0 0 100 35" aria-hidden="true"><g fill="#a6cf94"><rect x="5" y="27" width="6" height="8" rx="1" opacity="0.2"/><rect x="16" y="21" width="6" height="14" rx="1" opacity="0.30000000000000004"/><rect x="27" y="24" width="6" height="11" rx="1" opacity="0.4"/><rect x="38" y="14" width="6" height="21" rx="1" opacity="0.5"/><rect x="49" y="18" width="6" height="17" rx="1" opacity="0.6000000000000001"/><rect x="60" y="10" width="6" height="25" rx="1" opacity="0.7"/><rect x="71" y="5" width="6" height="30" rx="1" opacity="0.8"/><rect x="82" y="2" width="6" height="33" rx="1" opacity="0.9000000000000001"/></g></svg><h3>تعلّم من كل صفقة.</h3><p>راجع سجلك، تابع نتائجك، وشاهد تطوّر أدائك بوضوح.</p><div class="tool-card-foot"><span>سجل الصفقات والتقارير</span><svg class="op-icon " aria-hidden="true"><use href="#i-arrow"/></svg></div></button>
+      </section><section class="shortcut-grid" aria-label="المزيد من الأدوات"><button type="button" class="shortcut" onclick="switchPage('prices')"><svg class="op-icon " aria-hidden="true"><use href="#i-globe"/></svg><span>الأسعار والأخبار<small>ابقَ على اطلاع</small></span><svg class="op-icon " aria-hidden="true"><use href="#i-arrow"/></svg></button><button type="button" class="shortcut" onclick="switchPage('pulse')"><svg class="op-icon " aria-hidden="true"><use href="#i-pulse"/></svg><span>نبض السوق<small>تابع حركة الأسواق</small></span><svg class="op-icon " aria-hidden="true"><use href="#i-arrow"/></svg></button><button type="button" class="shortcut" onclick="switchPage('limit')"><svg class="op-icon " aria-hidden="true"><use href="#i-shield"/></svg><span>حد الخسارة<small>اعرف متى تتوقّف</small></span><svg class="op-icon " aria-hidden="true"><use href="#i-arrow"/></svg></button></section></div>
+  <div class="view" id="view-calc">
+  <div class="calc-layout">
 
-  <div class="view active" id="view-calc">
-
-  <div class="card">
+  <div class="card calc-input-card">
     <div class="rule-box">
-      💡 قاعدتك: كل صفقة <b>10%</b> من رأس مالك، وأقصى خسارة <b>2.5%</b> من رأس المال كامل، وأقل عائد مقبول <b>1:2.2</b>.
+       قاعدتك: كل صفقة <b>10%</b> من رأس مالك، وأقصى خسارة <b>2.5%</b> من رأس المال كامل، وأقل عائد مقبول <b>1:2.2</b>.
     </div>
 
-    <div class="step-title"><span class="step-num">1</span> قديش رأس مالك؟</div>
+    <div class="step-title"><span class="step-num">1</span> رأس المال بالدولار</div>
     <div class="form-row">
       <input type="number" id="capital" placeholder="مثلاً: 10000" inputmode="decimal">
       <div class="capital-hint" id="capitalHint"></div>
@@ -675,14 +580,14 @@
 
     <div class="step-title"><span class="step-num">2</span> نوع الصفقة</div>
     <div class="direction-toggle" id="assetToggle">
-      <div class="asset-opt selected" data-asset="crypto" onclick="selectAsset('crypto')">🪙 كريبتو فيوتشر (رافعة)</div>
-      <div class="asset-opt" data-asset="forex" onclick="selectAsset('forex')">💱 فوركس (لوت)</div>
+      <button type="button" class="asset-opt selected" data-asset="crypto" onclick="selectAsset('crypto')">كريبتو · Futures</button>
+      <button type="button" class="asset-opt" data-asset="forex" onclick="selectAsset('forex')">فوركس · Forex</button>
     </div>
 
     <div class="step-title"><span class="step-num">3</span> تفاصيل الصفقة</div>
     <div class="direction-toggle" id="directionToggle">
-      <div class="direction-opt selected" data-dir="buy" onclick="selectDirection('buy')">📈 شراء (طلوع)</div>
-      <div class="direction-opt" data-dir="sell" onclick="selectDirection('sell')">📉 بيع (نزول)</div>
+      <button type="button" class="direction-opt selected" data-dir="buy" onclick="selectDirection('buy')">شراء · Long</button>
+      <button type="button" class="direction-opt" data-dir="sell" onclick="selectDirection('sell')">بيع · Short</button>
     </div>
     <div class="form-grid">
       <div class="form-row">
@@ -714,10 +619,10 @@
       </select>
     </div>
 
-    <div class="adv-toggle" onclick="toggleAdv()">
-      <span>⚙️ تعديل النسب (لو حابب تغيّرها)</span>
+    <button type="button" class="adv-toggle" style="width:100%;font-family:inherit" aria-expanded="false" aria-controls="advBody" onclick="toggleAdv();this.setAttribute('aria-expanded',document.getElementById('advBody').classList.contains('open'));">
+      <span>إعدادات المخاطرة المتقدمة</span>
       <span id="advArrow">▾</span>
-    </div>
+    </button>
     <div class="adv-body" id="advBody">
       <div class="form-grid">
         <div class="form-row">
@@ -739,8 +644,10 @@
       </div>
     </div>
 
+  </div>
+  <div class="card calc-result-card"><div class="result-title"><svg class="op-icon " aria-hidden="true"><use href="#i-shield"/></svg> ملخّص الصفقة</div>
     <div class="empty-state" id="emptyState">
-      عبّي رأس المال وسعر الدخول والوقف فوق، والنتيجة بتطلع تلقائياً هون 👇
+      عبّي رأس المال وسعر الدخول والوقف فوق، والنتيجة بتطلع تلقائياً هون
     </div>
 
     <div class="result" id="result">
@@ -773,17 +680,18 @@
         </div>
       </div>
       <div class="lev-box" id="levBox" style="display:none;">
-        <div class="lev-title" id="levTitle">🔧 الرافعة المطلوبة</div>
+        <div class="lev-title" id="levTitle"> الرافعة المطلوبة</div>
         <div class="lev-main ltr" id="levMain">—</div>
         <div class="lev-sub" id="levSub"></div>
       </div>
-      <button class="btn journal-add-btn" onclick="addCurrentTradeToJournal()">📓 سجّل هذي الصفقة بالسجل</button>
-      <button class="btn share-card-btn" onclick="generateShareCard()">📸 صدّر كصورة للمشاركة</button>
+      <button class="btn journal-add-btn" onclick="addCurrentTradeToJournal()"> سجّل هذي الصفقة بالسجل</button>
+      <button class="btn share-card-btn" onclick="generateShareCard()"> صدّر كصورة للمشاركة</button>
     </div>
   </div>
 
+  </div><!-- /calc-layout -->
   <button class="market-toggle" onclick="toggleJournal()">
-    📓 <span id="journalToggleText">سجل الصفقات — تتبّع أداءك</span>
+     <span id="journalToggleText">سجل الصفقات — تتبّع أداءك</span>
   </button>
   <div class="market-panel" id="journalPanel">
     <div class="card" style="margin-top:0;">
@@ -803,7 +711,7 @@
   <div class="view" id="view-prices">
     <div class="card">
       <div class="market-section">
-        <div class="market-section-title">💱 أسعار العملات والذهب الآن</div>
+        <div class="market-section-title"> أسعار العملات والذهب الآن</div>
         <div class="price-grid" id="forexGrid">
           <div class="price-loading" style="grid-column:1/-1;">جاري تحميل الأسعار...</div>
         </div>
@@ -815,13 +723,13 @@
         </div>
       </div>
       <div class="market-section">
-        <div class="market-section-title">🥇 ذهب / نفط / ناسداك</div>
+        <div class="market-section-title"> ذهب / نفط / ناسداك</div>
         <div class="price-grid" id="indicesGrid">
           <div class="price-loading" style="grid-column:1/-1;">جاري تحميل الأسعار...</div>
         </div>
       </div>
       <div class="market-section">
-        <div class="market-section-title" id="newsSectionTitle">📰 أخبار مؤثرة هالأسبوع</div>
+        <div class="market-section-title" id="newsSectionTitle"> أخبار مؤثرة هالأسبوع</div>
         <div id="newsList">
           <div class="price-loading">جاري تحميل الأخبار...</div>
         </div>
@@ -834,7 +742,7 @@
   <div class="view" id="view-pulse">
     <div class="card">
       <div class="market-section">
-        <div class="market-section-title">🎯 وين تحلل اليوم؟ (ذهب، ناسداك، نفط، عملات)</div>
+        <div class="market-section-title"> وين تحلل اليوم؟ (ذهب، ناسداك، نفط، عملات)</div>
         <div class="session-info" id="sessionInfo">جاري تحديد الجلسة الحالية...</div>
         <div id="watchlistGrid">
           <div class="price-loading">جاري تجهيز التوصيات...</div>
@@ -847,31 +755,31 @@
   <!-- ============ IMAGE CHART ANALYSIS ============ -->
   <div class="view" id="view-imgchart">
     <div class="card">
-      <div class="step-title">📷 حلل صورة شارت</div>
+      <div class="step-title">تحليل صورة الشارت</div>
       <div class="smc-disclaimer" style="margin-top:0; margin-bottom:16px;">
         ارفع صورة الشارت وبس. المحرك بيقرأ الرمز والفريم والمنصة من الصورة نفسها — إذا الأداة موجودة على Bybit أو Binance بيجيب بياناتها الحية وبيشغّل تحليل SMC/ICT كامل، وإذا فوركس أو ذهب أو مؤشر بيحللها من الصورة وبينبّهك إن الأرقام تقريبية. النتيجة وحدة من تلاتة: <b>صفقة الآن</b>، <b>صفقة محتملة قريبة</b>، أو <b>لا صفقة</b> — و«لا صفقة» نتيجة صحيحة مش فشل.
       </div>
       <div id="imgServiceStatus" style="display:none;"></div>
 
       <div class="form-row">
-        <div class="img-drop" id="imgDrop" onclick="document.getElementById('imgFileInput').click()">
-          <span id="imgDropText">📎 دوس هون لاختيار صورة الشارت، أو الصق صورة (Ctrl+V)</span>
+        <div class="img-drop" id="imgDrop" role="button" tabindex="0" aria-label="اختيار صورة الشارت" onclick="document.getElementById('imgFileInput').click()">
+          <svg class="op-icon " aria-hidden="true"><use href="#i-upload"/></svg><span id="imgDropText"> دوس هون لاختيار صورة الشارت، أو الصق صورة (Ctrl+V)</span>
           <img id="imgPreview" style="display:none;" alt="معاينة الصورة">
         </div>
         <input type="file" id="imgFileInput" accept="image/*" style="display:none;" onchange="handleImgFile(this.files[0])">
       </div>
 
-      <button class="btn" id="imgAnalyzeBtn" onclick="analyzeChartImage()" disabled>🔍 حلّل الشارت</button>
+      <button class="btn" id="imgAnalyzeBtn" onclick="analyzeChartImage()" disabled> حلّل الشارت</button>
       <div id="imgAnalysisResult"></div>
 
-      <div class="smc-disclaimer">⚠️ التحليل بالذكاء الاصطناعي تقديري وبيعتمد على وضوح الصور — ممكن يخطئ بقراءة الأرقام أو الاتجاه. راجع دايماً الأرقام بعينك ولا تعتمد عليه وحده قبل التنفيذ — مش توصية استثمارية.</div>
+      <div class="smc-disclaimer"> التحليل بالذكاء الاصطناعي تقديري وبيعتمد على وضوح الصور — ممكن يخطئ بقراءة الأرقام أو الاتجاه. راجع دايماً الأرقام بعينك ولا تعتمد عليه وحده قبل التنفيذ — مش توصية استثمارية.</div>
     </div>
   </div>
 
   <!-- ============ DAILY LOSS LIMIT ============ -->
   <div class="view" id="view-limit">
     <div class="card">
-      <div class="step-title">🛑 حد الخسارة اليومي</div>
+      <div class="step-title"> حد الخسارة اليومي</div>
       <div class="form-row">
         <label>أقصى نسبة خسارة مسموحة باليوم (% من رأس مالك)</label>
         <input type="number" id="dailyLimitPct" value="5" inputmode="decimal" oninput="renderDailyLimit(); saveSettings();">
@@ -889,23 +797,23 @@
   <!-- ============ WEEKLY / MONTHLY REPORT ============ -->
   <div class="view" id="view-report">
     <div class="card">
-      <div class="step-title">📊 تقرير الأداء</div>
+      <div class="step-title"> تقرير الأداء</div>
       <div class="report-tabs">
-        <div class="report-tab-btn active" data-range="week" onclick="switchReportRange('week')">هالأسبوع</div>
-        <div class="report-tab-btn" data-range="month" onclick="switchReportRange('month')">هالشهر</div>
-        <div class="report-tab-btn" data-range="all" onclick="switchReportRange('all')">الكل</div>
+        <button type="button" class="report-tab-btn active" data-range="week" onclick="switchReportRange('week')">هالأسبوع</button>
+        <button type="button" class="report-tab-btn" data-range="month" onclick="switchReportRange('month')">هالشهر</button>
+        <button type="button" class="report-tab-btn" data-range="all" onclick="switchReportRange('all')">الكل</button>
       </div>
       <div id="reportContent"></div>
       <div style="display:flex; gap:8px; margin-top:18px;">
-        <button class="btn" style="background:var(--bg-panel-3); border:1.5px solid var(--border-strong); color:var(--purple-glow);" onclick="exportJournal()">📤 تصدير السجل (نسخة احتياطية)</button>
-        <button class="btn" style="background:var(--bg-panel-3); border:1.5px solid var(--border-strong); color:var(--purple-glow);" onclick="document.getElementById('journalImportInput').click()">📥 استيراد سجل</button>
+        <button class="btn" style="background:var(--bg-panel-3); border:1.5px solid var(--border-strong); color:var(--purple-glow);" onclick="exportJournal()"> تصدير السجل (نسخة احتياطية)</button>
+        <button class="btn" style="background:var(--bg-panel-3); border:1.5px solid var(--border-strong); color:var(--purple-glow);" onclick="document.getElementById('journalImportInput').click()"> استيراد سجل</button>
         <input type="file" id="journalImportInput" accept="application/json" style="display:none;" onchange="importJournalFile(this.files[0])">
       </div>
     </div>
   </div>
 
-    <footer>THE OP — Trading Academy · Mr Ali</footer>
-  </div><!-- /main -->
+    <footer class="workspace-footer"><span class="ltr">THE OP. <span style="color:var(--text-dim)">/ TRADING WORKSPACE</span></span><span>صُمّم لقرار أوضح. التداول ينطوي على مخاطر.</span><span>بإشراف Mr Ali</span></footer>
+  </main><!-- /main -->
 </div><!-- /app -->
 
 <script>
@@ -1011,10 +919,10 @@ function updateCapitalHint(){
   }
   const margin = capital * (posPct / 100);
   const label = assetType === 'crypto'
-    ? '💰 قديش تدخل بالصفقة (الهامش/Margin)'
+    ? ' قديش تدخل بالصفقة (الهامش/Margin)'
     : assetType === 'forex'
-      ? '💰 قديش تدخل بالصفقة (رأس مال اللوت)'
-      : '💰 قديش تدخل بالصفقة';
+      ? ' قديش تدخل بالصفقة (رأس مال اللوت)'
+      : ' قديش تدخل بالصفقة';
   hint.innerHTML = `${label}: <span class="ltr">$${margin.toFixed(2)}</span> <span style="color:var(--text-dim); font-weight:400;">(${posPct}% من رأس مالك)</span>`;
   hint.classList.add('show');
 }
@@ -1037,7 +945,7 @@ function calculate(){
   if(!haveBasics){
     resultEl.classList.remove('show');
     emptyEl.style.display = 'block';
-    emptyEl.textContent = 'عبّي رأس المال وسعر الدخول والوقف فوق، والنتيجة بتطلع تلقائياً هون 👇';
+    emptyEl.textContent = 'عبّي رأس المال وسعر الدخول والوقف فوق، والنتيجة بتطلع تلقائياً هون ';
     return;
   }
   const stopValid = tradeDirection === 'buy' ? stop < entry : stop > entry;
@@ -1045,8 +953,8 @@ function calculate(){
     resultEl.classList.remove('show');
     emptyEl.style.display = 'block';
     emptyEl.textContent = tradeDirection === 'buy'
-      ? '⚠️ بصفقة الشراء، وقف الخسارة لازم يكون أوطأ من سعر الدخول'
-      : '⚠️ بصفقة البيع، وقف الخسارة لازم يكون أعلى من سعر الدخول';
+      ? ' بصفقة الشراء، وقف الخسارة لازم يكون أوطأ من سعر الدخول'
+      : ' بصفقة البيع، وقف الخسارة لازم يكون أعلى من سعر الدخول';
     return;
   }
 
@@ -1118,17 +1026,17 @@ function calculate(){
   if(assetType === 'crypto'){
     levBox.style.display = 'block';
     if(leverageCapped){
-      levTitle.textContent = '🔧 الرافعة (X) — مضبوطة على أقصى حد';
+      levTitle.textContent = ' الرافعة (X) — مضبوطة على أقصى حد';
       levMain.textContent = MAX_LEVERAGE + 'x';
       levSub.innerHTML = `الرافعة المثالية كانت <b class="ltr">${idealLeverage.toFixed(1)}x</b> — عالية أكتر من حدك (${MAX_LEVERAGE}x). قللناها لـ <b class="ltr">${MAX_LEVERAGE}x</b> على هامش <b class="ltr">$${margin.toFixed(2)}</b>، فصارت خسارتك ${lossPctMargin.toFixed(2)}% من رأس مال الصفقة (أقل من حدك الأصلي ${riskPct}%، بس أأمن).`;
     } else {
-      levTitle.textContent = '🔧 الرافعة (X) المطلوبة';
+      levTitle.textContent = ' الرافعة (X) المطلوبة';
       levMain.textContent = idealLeverage.toFixed(1) + 'x';
       levSub.innerHTML = `حط رافعة <b class="ltr">${idealLeverage.toFixed(1)}x</b> على هامش <b class="ltr">$${margin.toFixed(2)}</b> — لو ضرب الوقف، خسارتك تساوي حدك بالظبط.`;
     }
   } else if(assetType === 'forex'){
     levBox.style.display = 'block';
-    levTitle.textContent = '🔧 حجم اللوت المطلوب';
+    levTitle.textContent = ' حجم اللوت المطلوب';
     const {pips, pipValuePerStandardLot, MIN_LOT, requiredLots} = forexCalc;
     if(belowMinLot){
       levMain.textContent = MIN_LOT.toFixed(2) + ' لوت (أقل حجم ممكن)';
@@ -1155,15 +1063,15 @@ function calculate(){
     msg.textContent = `الخسارة عند ${lossPctMargin.toFixed(2)}% من رأس مال الصفقة (حسب الرافعة/اللوت تحت). أدخل سعر الهدف عشان نتأكد الربح كافي.`;
   } else if(goodRR && goodProfit){
     hero.className = 'result-hero ok';
-    label.textContent = '✅ صفقة ممتازة';
+    label.textContent = ' صفقة ممتازة';
     msg.textContent = `الربح المتوقع ${profitPctMargin.toFixed(2)}% من رأس مال الصفقة (فوق حدك 35%)، ونسبة المخاطرة/العائد 1:${rr.toFixed(2)} (فوق حدك 1:${minRR}). صفقة قوية حسب معاييرك.`;
   } else if(!goodProfit){
     hero.className = 'result-hero warn';
-    label.textContent = '⚠️ الربح المتوقع أقل من 35%';
+    label.textContent = ' الربح المتوقع أقل من 35%';
     msg.textContent = `الربح المتوقع ${profitPctMargin.toFixed(2)}% من رأس مال الصفقة بس — تحت حدك (35%). فكر تدور هدف أبعد، أو صفقة بمسافة وقف أضيق.`;
   } else {
     hero.className = 'result-hero warn';
-    label.textContent = '⚠️ العائد أقل من حدك';
+    label.textContent = ' العائد أقل من حدك';
     msg.textContent = `الربح المتوقع ${profitPctMargin.toFixed(2)}% (تمام)، بس نسبة المخاطرة/العائد 1:${rr.toFixed(2)} — أقل من حدك الأدنى (1:${minRR}). فكر تدور فرصة أحسن.`;
   }
 
@@ -1264,7 +1172,7 @@ function renderTicker(){
       : '';
     return `<span class="mkt-item">
       <span class="mkt-sym">${i.label}</span>
-      ${sparklineSVG(trend)}
+
       <span class="mkt-price">${d.price}</span>
       ${chgHTML}
     </span>`;
@@ -1417,7 +1325,7 @@ async function loadNews(){
 
     const showingToday = todayEvents.length > 0;
     const important = (showingToday ? todayEvents : weeklyEvents).slice(0, 8);
-    if(titleEl) titleEl.textContent = showingToday ? '📰 أخبار اليوم المؤثرة' : '📰 أقرب الأخبار المؤثرة هالأسبوع';
+    if(titleEl) titleEl.textContent = showingToday ? ' أخبار اليوم المؤثرة' : ' أقرب الأخبار المؤثرة هالأسبوع';
 
     if(important.length === 0){
       list.innerHTML = `<div class="price-loading">أسبوع هادي نسبياً — ما في أخبار كبيرة متوقعة</div>`;
@@ -1425,7 +1333,7 @@ async function loadNews(){
     }
     list.innerHTML = important.map(ev=>{
       const impactClass = ev.impact === 'High' ? 'high' : 'medium';
-      const impactLabel = ev.impact === 'High' ? '🔴 تأثير قوي' : '🟠 تأثير متوسط';
+      const impactLabel = ev.impact === 'High' ? ' تأثير قوي' : ' تأثير متوسط';
       let timeStr = '--:--';
       try{
         const d = new Date(ev.date);
@@ -1444,9 +1352,9 @@ async function loadNews(){
     }).join('') + `<div style="text-align:left; margin-top:8px;"><a href="https://www.forexfactory.com" target="_blank" rel="noopener" style="font-size:11px; color:var(--purple-glow); text-decoration:none;">المصدر: ForexFactory ↗</a></div>`;
   }catch(e){
     weeklyEvents = [];
-    if(titleEl) titleEl.textContent = '📰 أخبار السوق';
+    if(titleEl) titleEl.textContent = ' أخبار السوق';
     list.innerHTML = `<div class="price-loading">تعذر تحميل الأخبار الآن.</div>
-      <button class="btn" style="margin-top:8px;" onclick="loadNews()">🔄 إعادة المحاولة</button>`;
+      <button class="btn" style="margin-top:8px;" onclick="loadNews()"> إعادة المحاولة</button>`;
   }
 }
 
@@ -1463,23 +1371,23 @@ function getCurrentSession(){
   const isOverlap = sessions.length >= 2;
   let label, note, activeAssets;
   if(sessions.includes('london') && sessions.includes('newyork')){
-    label = 'تقاطع لندن ⚡ نيويورك';
+    label = 'تقاطع لندن  نيويورك';
     note = 'أعلى سيولة وتقلب باليوم — وقت ممتاز لليورو، الإسترليني، الذهب، وناسداك.';
     activeAssets = ['EURUSD','GBPUSD','GOLD','NASDAQ','OIL'];
   } else if(sessions.includes('london')){
-    label = 'جلسة لندن 🇬🇧';
+    label = 'جلسة لندن ';
     note = 'نشاط قوي على اليورو والإسترليني والذهب.';
     activeAssets = ['EURUSD','GBPUSD','GOLD'];
   } else if(sessions.includes('newyork')){
-    label = 'جلسة نيويورك 🇺🇸';
+    label = 'جلسة نيويورك ';
     note = 'نشاط قوي على الدولار، الذهب، ناسداك، والنفط.';
     activeAssets = ['GOLD','NASDAQ','OIL','EURUSD','GBPUSD'];
   } else if(sessions.includes('tokyo')){
-    label = 'جلسة طوكيو 🇯🇵';
+    label = 'جلسة طوكيو ';
     note = 'نشاط أهدأ عموماً، أفضل شي الين والأزواج الآسيوية.';
     activeAssets = ['USDJPY'];
   } else {
-    label = 'بين الجلسات 🌙';
+    label = 'بين الجلسات ';
     note = 'سيولة منخفضة نسبياً — التقلبات ممكن تكون غير منتظمة.';
     activeAssets = [];
   }
@@ -1531,11 +1439,11 @@ function renderWatchlist(){
     const priceLine = d.price ? d.price + (d.change !== undefined ? ` (${d.change >= 0 ? '+' : ''}${d.change.toFixed(2)}%)` : '') : '—';
     let statusHTML;
     if(item.score >= 3){
-      statusHTML = `<span class="watch-status calm">🏆 أفضل خيار الآن</span>`;
+      statusHTML = `<span class="watch-status calm"> أفضل خيار الآن</span>`;
     } else if(!item.hasNews){
-      statusHTML = `<span class="watch-status calm">✅ هادئ نسبياً</span>`;
+      statusHTML = `<span class="watch-status calm"> هادئ نسبياً</span>`;
     } else {
-      statusHTML = `<span class="watch-status alert">⚠️ فيه خبر هالأسبوع</span>`;
+      statusHTML = `<span class="watch-status alert"> فيه خبر هالأسبوع</span>`;
     }
     return `<div class="watch-card">
       <div class="watch-left"><div class="watch-name ltr">${item.name}</div><div class="watch-price ltr">${priceLine}</div></div>
@@ -1622,17 +1530,17 @@ async function generateShareCard(){
   ctx.fillStyle = bg; ctx.fillRect(0,0,W,H);
 
   const glow1 = ctx.createRadialGradient(W*0.85,120,10,W*0.85,120,420);
-  glow1.addColorStop(0,'rgba(34,211,238,0.18)'); glow1.addColorStop(1,'rgba(34,211,238,0)');
+  glow1.addColorStop(0,'rgba(196,237,152,0.18)'); glow1.addColorStop(1,'rgba(196,237,152,0)');
   ctx.fillStyle = glow1; ctx.fillRect(0,0,W,H);
 
   // إطار ذهبي خارجي
-  ctx.strokeStyle = 'rgba(34,211,238,0.35)'; ctx.lineWidth = 3;
+  ctx.strokeStyle = 'rgba(196,237,152,0.35)'; ctx.lineWidth = 3;
   roundRectPath(ctx, 24, 24, W-48, H-48, 28); ctx.stroke();
 
   ctx.textAlign = 'center';
 
   // شعار
-  ctx.fillStyle = '#22d3ee';
+  ctx.fillStyle = '#c4ed98';
   ctx.font = '800 54px "JetBrains Mono", monospace';
   ctx.fillText('THE OP', W/2, 130);
   ctx.fillStyle = '#7fa9be';
@@ -1640,7 +1548,7 @@ async function generateShareCard(){
   ctx.fillText('TRADING ACADEMY · MR ALI', W/2, 168);
 
   // خط فاصل
-  ctx.strokeStyle = 'rgba(34,211,238,0.25)'; ctx.lineWidth = 1.5;
+  ctx.strokeStyle = 'rgba(196,237,152,0.25)'; ctx.lineWidth = 1.5;
   ctx.beginPath(); ctx.moveTo(140,205); ctx.lineTo(W-140,205); ctx.stroke();
 
   // اسم الأداة
@@ -1654,7 +1562,7 @@ async function generateShareCard(){
   // شارة الاتجاه
   const isBuy = lastCalc.tradeDirection === 'buy';
   const dirColor = isBuy ? '#34d399' : '#ff5c7a';
-  const dirText = isBuy ? '📈  شراء' : '📉  بيع';
+  const dirText = isBuy ? '  شراء' : '  بيع';
   ctx.fillStyle = isBuy ? 'rgba(52,211,153,0.14)' : 'rgba(248,113,113,0.14)';
   roundRectPath(ctx, W/2-140, 320, 280, 76, 38); ctx.fill();
   ctx.strokeStyle = dirColor; ctx.lineWidth = 2;
@@ -1676,7 +1584,7 @@ async function generateShareCard(){
     const x = startX + i*(cardW+gap);
     ctx.fillStyle = 'rgba(255,255,255,0.03)';
     roundRectPath(ctx, x, priceY, cardW, cardH, 18); ctx.fill();
-    ctx.strokeStyle = 'rgba(34,211,238,0.2)'; ctx.lineWidth = 1.5;
+    ctx.strokeStyle = 'rgba(196,237,152,0.2)'; ctx.lineWidth = 1.5;
     roundRectPath(ctx, x, priceY, cardW, cardH, 18); ctx.stroke();
     ctx.fillStyle = '#7fa9be'; ctx.font = '600 24px Cairo, sans-serif';
     ctx.fillText(pc.label, x+cardW/2, priceY+42);
@@ -1688,11 +1596,11 @@ async function generateShareCard(){
   const rrY = 700;
   ctx.fillStyle = '#7fa9be'; ctx.font = '600 26px Cairo, sans-serif';
   ctx.fillText('نسبة المخاطرة / العائد', W/2, rrY);
-  ctx.fillStyle = '#22d3ee'; ctx.font = '800 96px "JetBrains Mono", monospace';
+  ctx.fillStyle = '#c4ed98'; ctx.font = '800 96px "JetBrains Mono", monospace';
   ctx.fillText(lastCalc.rr ? `1 : ${lastCalc.rr.toFixed(2)}` : '—', W/2, rrY+110);
 
   // خط فاصل
-  ctx.strokeStyle = 'rgba(34,211,238,0.25)'; ctx.lineWidth = 1.5;
+  ctx.strokeStyle = 'rgba(196,237,152,0.25)'; ctx.lineWidth = 1.5;
   ctx.beginPath(); ctx.moveTo(140,880); ctx.lineTo(W-140,880); ctx.stroke();
 
   // نسب ومبالغ الخسارة/الربح
@@ -1753,7 +1661,7 @@ function addCurrentTradeToJournal(){
   });
   persistJournal();
   renderJournal();
-  showToastCalc('✅ ضفنا الصفقة للسجل — علّم عليها ربح/خسارة بعد ما تقفلها');
+  showToastCalc(' ضفنا الصفقة للسجل — علّم عليها ربح/خسارة بعد ما تقفلها');
   const panel = document.getElementById('journalPanel');
   if(!panel.classList.contains('open')) toggleJournal();
 }
@@ -1807,7 +1715,7 @@ function renderJournal(){
   document.getElementById('jTotalCount').textContent = total;
   document.getElementById('jWinRate').textContent = winRate !== null ? winRate.toFixed(0) + '%' : '—';
   document.getElementById('jAvgRR').textContent = avgRR !== null ? '1:' + avgRR.toFixed(2) : '—';
-  document.getElementById('jStreak').textContent = streakType ? streak + (streakType === 'win' ? ' 🟢' : ' 🔴') : '—';
+  document.getElementById('jStreak').textContent = streakType ? streak + (streakType === 'win' ? ' ' : ' ') : '—';
 
   if(total === 0){
     empty.style.display = 'block';
@@ -1818,7 +1726,7 @@ function renderJournal(){
 
   const assetLabel = {crypto:'كريبتو', forex:'فوركس'};
   const dirLabel = {buy:'شراء', sell:'بيع'};
-  const statusLabel = {open:'قيد التنفيذ', win:'✅ ربح', loss:'❌ خسارة', breakeven:'⚪ تعادل'};
+  const statusLabel = {open:'قيد التنفيذ', win:' ربح', loss:' خسارة', breakeven:' تعادل'};
   const instrumentLabel = INSTRUMENT_LABELS;
 
   list.innerHTML = journal.map(j=>{
@@ -1873,7 +1781,7 @@ async function checkImgService(){
       box.style.display = 'block';
       box.className = 'smc-disclaimer';
       box.style.borderColor = 'var(--red)';
-      box.textContent = '⚠️ خدمة التحليل مش مفعّلة على الخادم. لازم مالك التطبيق يضبط مفتاح الخدمة قبل ما تشتغل هالميزة.';
+      box.textContent = ' خدمة التحليل مش مفعّلة على الخادم. لازم مالك التطبيق يضبط مفتاح الخدمة قبل ما تشتغل هالميزة.';
     }
   }
   updateImgAnalyzeBtnState();
@@ -2016,7 +1924,7 @@ async function analyzeChartImage(){
     if(!res.ok || !data || !data.state){
       const msg = (data && data.message) || 'صار خطأ غير متوقع. جرّب مرة تانية.';
       resultEl.innerHTML = `<div class="smc-suggestion" style="border-color:var(--red);">
-        <div class="smc-sugg-title">⚠️ ما قدرنا نكمّل التحليل</div>
+        <div class="smc-sugg-title"> ما قدرنا نكمّل التحليل</div>
         <div style="font-size:12.5px; color:var(--text-muted); line-height:1.8;">${escapeSMC(msg)}</div>
       </div>`;
       return;
@@ -2029,7 +1937,7 @@ async function analyzeChartImage(){
     renderImgAnalysisResult(data);
   }catch(e){
     resultEl.innerHTML = `<div class="smc-suggestion" style="border-color:var(--red);">
-      <div class="smc-sugg-title">⚠️ تعذّر الاتصال بالخادم</div>
+      <div class="smc-sugg-title"> تعذّر الاتصال بالخادم</div>
       <div style="font-size:12.5px; color:var(--text-muted); line-height:1.8;">ما وصلنا رد من الخادم. تأكد من اتصالك بالإنترنت وجرّب مرة تانية — وإذا كانت الخدمة نايمة، أول محاولة ممكن تاخد لحد دقيقة.</div>
     </div>`;
   }finally{
@@ -2063,11 +1971,11 @@ function renderImgAnalysisResult(a){
   const dirWord = a.direction === 'SHORT' ? 'بيع (SHORT)' : 'شراء (LONG)';
   const STATE = {
     TRADE_NOW: {
-      t: (a.direction === 'SHORT' ? '🔴' : '🟢') + ' صفقة الآن — ' + dirWord,
+      t: (a.direction === 'SHORT' ? '' : '') + ' صفقة الآن — ' + dirWord,
       c: a.direction === 'SHORT' ? 'var(--red)' : 'var(--green)'
     },
-    TRADE_SOON: { t:'🟡 صفقة محتملة قريبة — ' + dirWord, c:'var(--amber)' },
-    NO_TRADE:   { t:'⚪ لا صفقة', c:'var(--text-dim)' }
+    TRADE_SOON: { t:' صفقة محتملة قريبة — ' + dirWord, c:'var(--amber)' },
+    NO_TRADE:   { t:' لا صفقة', c:'var(--text-dim)' }
   };
   const s = STATE[a.state] || STATE.NO_TRADE;
   const hasPlan = a.state === 'TRADE_NOW' || a.state === 'TRADE_SOON';
@@ -2107,7 +2015,7 @@ function renderImgAnalysisResult(a){
   /* ---- تنبيه الأرقام التقريبية (فوركس / أداة مش على المنصات) ---- */
   if(a.approximate){
     html += `<div class="smc-suggestion" style="border-color:var(--amber); margin-top:14px;">
-      <div class="smc-sugg-title" style="color:var(--amber);">⚠️ الأرقام تقريبية</div>
+      <div class="smc-sugg-title" style="color:var(--amber);"> الأرقام تقريبية</div>
       <div style="font-size:12.5px; color:var(--text-muted); line-height:1.9;">
         ${escapeSMC(a.approximateReason || '')}
       </div>
@@ -2117,19 +2025,19 @@ function renderImgAnalysisResult(a){
   /* ---- سعر التفعيل (صفقة محتملة قريبة) ---- */
   if(a.state === 'TRADE_SOON'){
     html += `<div class="card" style="margin-top:14px; border-color:var(--amber);">
-      <div class="card-title">⏱️ متى بتصير صفقة</div>
+      <div class="card-title">⏱ متى بتصير صفقة</div>
       <div class="smc-sugg-grid">
         ${row('السعر المطلوب للتفعيل', '<span class="ltr" style="color:var(--amber); font-weight:800;">' + (a.triggerPrice ?? '—') + '</span>')}
         ${row('السعر الحالي', num(a.currentPrice))}
       </div>
-      ${a.triggerReason ? '<div class="smc-zone-note" style="margin-top:10px;">📌 <b>السبب:</b> ' + escapeSMC(a.triggerReason) + '</div>' : ''}
+      ${a.triggerReason ? '<div class="smc-zone-note" style="margin-top:10px;"> <b>السبب:</b> ' + escapeSMC(a.triggerReason) + '</div>' : ''}
       <div class="smc-zone-note" style="margin-top:6px; opacity:.8;">الأرقام تحت هي الخطة <b>المفترضة</b> إذا تفعّلت — مش أمر تنفيذ الآن.</div>
     </div>`;
   }
 
   /* ---- خطة الصفقة ---- */
   if(hasPlan){
-    const planTitle = a.state === 'TRADE_NOW' ? '📐 خطة الصفقة' : '📐 الخطة المفترضة عند التفعيل';
+    const planTitle = a.state === 'TRADE_NOW' ? ' خطة الصفقة' : ' الخطة المفترضة عند التفعيل';
     html += `<div class="card" style="margin-top:14px;">
       <div class="card-title">${planTitle}${a.setupType ? ' — ' + escapeSMC(a.setupType) : ''}</div>
       <div class="smc-sugg-grid">
@@ -2144,10 +2052,10 @@ function renderImgAnalysisResult(a){
           : '—')}
       </div>
       ${a.riskReward && a.riskReward.value < 2.3 ? `<div class="smc-zone-note" style="margin-top:10px; border-color:var(--amber);">
-        ⚖️ الهدف الأول قريب نسبة لمسافة الوقف (<span class="ltr">1:${a.riskReward.value}</span>، والمفضّل <span class="ltr">1:2.3</span>).
+         الهدف الأول قريب نسبة لمسافة الوقف (<span class="ltr">1:${a.riskReward.value}</span>، والمفضّل <span class="ltr">1:2.3</span>).
         الأهداف الأبعد بتحسّن النسبة — فكّر بالخروج على مراحل بدل هدف واحد.
       </div>` : ''}
-      <button class="btn" style="margin-top:12px;" onclick="applyImgAnalysisToCalculator()">📥 افتح بالحاسبة (الرافعة وحجم المركز)</button>
+      <button class="btn" style="margin-top:12px;" onclick="applyImgAnalysisToCalculator()"> افتح بالحاسبة (الرافعة وحجم المركز)</button>
     </div>`;
 
     /* الرافعة وحجم المركز كانوا هون وانشالوا: الحاسبة بتعملهم أصلاً وبإعدادات
@@ -2155,7 +2063,7 @@ function renderImgAnalysisResult(a){
 
     const pct = Math.max(0, Math.min(100, a.setupQuality || 0));
     html += `<div class="card" style="margin-top:14px;">
-      <div class="card-title">📊 جودة الإعداد الفنية — <span class="ltr">${pct}</span>/100</div>
+      <div class="card-title"> جودة الإعداد الفنية — <span class="ltr">${pct}</span>/100</div>
       <div class="limit-bar-wrap"><div class="limit-bar" style="width:${pct}%; background:${pct>=75?'var(--green)':pct>=55?'var(--amber)':'var(--red)'};"></div></div>
       <div class="smc-zone-note" style="margin-top:10px;">هاي درجة تناغم العوامل الفنية — <b>وليست احتمال ربح</b>. لا يوجد تحليل مضمون.</div>
     </div>`;
@@ -2169,7 +2077,7 @@ function renderImgAnalysisResult(a){
       : `${dirAr} الآن من <span class="ltr">${a.entry.from} – ${a.entry.to}</span> · وقف <span class="ltr">${a.stopLoss ?? '—'}</span> · أول هدف <span class="ltr">${a.targets.tp1 ?? '—'}</span>`;
 
     html += `<div class="card" style="margin-top:14px;">
-      <div class="card-title">✅ الخلاصة</div>
+      <div class="card-title"> الخلاصة</div>
       <div class="smc-zone-note" style="font-size:13.5px; line-height:2;">${bottomLine}</div>
       <div class="market-section-title">شرط التنفيذ</div>
       ${listTop(a.confirmationRequired, 2)}
@@ -2179,13 +2087,13 @@ function renderImgAnalysisResult(a){
   /* ---- شو قرأ المحرك من الصورة ---- */
   const id = a.identification || {};
   html += `<div class="card" style="margin-top:14px;">
-    <div class="card-title">🧭 شو قرأ المحرك من الصورة</div>
+    <div class="card-title"> شو قرأ المحرك من الصورة</div>
     <div class="smc-sugg-grid">
       ${row('الأداة', escapeSMC(a.symbol || '—'))}
       ${row('الإطار', escapeSMC(a.timeframe || '—') + (id.timeframeAssumed ? ' <span style="opacity:.6;font-size:11px;">(افتراضي)</span>' : ''))}
       ${row('المنصة', escapeSMC(a.exchange || (id.exchangeRead || 'ما ظهرت بالصورة')))}
       ${row('نوع السوق', KIND[id.marketKind] || escapeSMC(id.marketKind || '—'))}
-      ${row('مصدر الأرقام', a.dataSource === 'live' ? '🟢 بيانات حية' : '🟡 من الصورة')}
+      ${row('مصدر الأرقام', a.dataSource === 'live' ? ' بيانات حية' : ' من الصورة')}
       ${row('السعر الحالي', num(a.currentPrice))}
       ${row('حالة السوق', escapeSMC(a.marketRegime || '—'))}
       ${row('جودة البيانات', DQ[a.dataQuality] || escapeSMC(a.dataQuality || '—'))}
@@ -2196,7 +2104,7 @@ function renderImgAnalysisResult(a){
         ${Object.entries(a.timeframeBias).map(([tf,b])=>row(tf.toUpperCase(), BIAS[b]||b)).join('')}
       </div>` : ''}
     ${!id.resolved ? `<div class="smc-zone-note" style="margin-top:10px; border-color:var(--amber);">
-      🔎 <b>شو قرأت مرحلة الرؤية بالضبط:</b>
+       <b>شو قرأت مرحلة الرؤية بالضبط:</b>
       الرمز: <span class="ltr">${escapeSMC(id.symbolRead || 'لا شيء')}</span> ·
       الفريم: <span class="ltr">${escapeSMC(id.timeframeRead || 'لا شيء')}</span> ·
       المنصة: <span class="ltr">${escapeSMC(id.exchangeRead || 'لا شيء')}</span>
@@ -2209,8 +2117,8 @@ function renderImgAnalysisResult(a){
 
   /* ---- الإبطال والمخاطر ---- */
   html += `<div class="card" style="margin-top:14px;">
-    <div class="card-title">🧯 الإبطال والمخاطر</div>
-    ${a.invalidation ? '<div class="smc-zone-note">❌ <b>يُبطل الفكرة:</b> ' + escapeSMC(a.invalidation) + '</div>' : ''}
+    <div class="card-title"> الإبطال والمخاطر</div>
+    ${a.invalidation ? '<div class="smc-zone-note"> <b>يُبطل الفكرة:</b> ' + escapeSMC(a.invalidation) + '</div>' : ''}
     ${(a.riskFactors||[]).length ? '<div class="market-section-title">عوامل الخطر</div>' + listTop(a.riskFactors, 3) : ''}
     ${(a.cancelConditions||[]).length || (a.conflictingEvidence||[]).length || (a.warnings||[]).length ? `
       <details style="margin-top:10px;">
@@ -2223,7 +2131,7 @@ function renderImgAnalysisResult(a){
 
   /* ---- الشفافية: مين وافق ومين رفض ---- */
   html += `<div class="card" style="margin-top:14px;">
-    <div class="card-title">🔍 مسار القرار</div>
+    <div class="card-title"> مسار القرار</div>
     <div class="smc-sugg-grid">
       ${row('وضع التحليل', escapeSMC(a.analysisMode || '—'))}
       ${row('المراجع المستقل', VERIFIER[a.verifierStatus] || escapeSMC(a.verifierStatus || '—'))}
@@ -2270,7 +2178,7 @@ function applyImgAnalysisToCalculator(){
   }
 
   calculate();
-  showToastCalc('✅ عبّينا الحاسبة بأرقام تحليل الصورة — راجعها وعدّل إذا حبيت');
+  showToastCalc(' عبّينا الحاسبة بأرقام تحليل الصورة — راجعها وعدّل إذا حبيت');
 }
 
 checkImgService();
@@ -2279,7 +2187,7 @@ checkImgService();
 const pageTabsEl = document.getElementById('pageTabs');
 if(pageTabsEl){
   pageTabsEl.addEventListener('wheel', (e)=>{
-    if(Math.abs(e.deltaY) > Math.abs(e.deltaX)){
+    if(window.innerWidth <= 760 && Math.abs(e.deltaY) > Math.abs(e.deltaX)){
       e.preventDefault();
       pageTabsEl.scrollLeft += e.deltaY;
     }
@@ -2287,6 +2195,7 @@ if(pageTabsEl){
 }
 
 const PAGE_META = {
+  home: ['مساحة عملك. أفق أوسع.', 'كل ما تحتاجه لقراءة السوق وإدارة صفقتك، في مكان واحد.'],
   calc:     ['حاسبة حجم الصفقة', 'احسب حجم صفقتك وخسارتك المحتملة قبل ما تدخل السوق'],
   imgchart: ['تحليل صورة الشارت', 'ارفع الصورة وبس — والمحرك بيقرأ الرمز والفريم ويعطيك: صفقة الآن، صفقة محتملة قريبة، أو لا صفقة'],
   prices:   ['الأسعار والأخبار', 'أسعار لحظية وأهم أخبار السوق'],
@@ -2295,7 +2204,11 @@ const PAGE_META = {
   report:   ['التقرير وسجل الصفقات', 'إحصائيات أدائك ومنحنى رأس مالك'],
 };
 function switchPage(page){
-  document.querySelectorAll('.page-tab').forEach(t => t.classList.toggle('active', t.dataset.page === page));
+  if(!PAGE_META[page] || !document.getElementById('view-' + page)) return;
+  document.querySelectorAll('.page-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.page === page);
+    if(t.dataset.page === page) t.setAttribute('aria-current', 'page'); else t.removeAttribute('aria-current');
+  });
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.getElementById('view-' + page).classList.add('active');
   const meta = PAGE_META[page];
@@ -2305,7 +2218,9 @@ function switchPage(page){
   }
   if(page === 'limit') renderDailyLimit();
   if(page === 'report') renderReport();
-  window.scrollTo({top:0, behavior:'smooth'});
+  document.dispatchEvent(new CustomEvent('op:pagechange', {detail:{page}}));
+  document.getElementById('pageTitle').focus({preventScroll:true});
+  window.scrollTo({top:0, behavior:document.documentElement.classList.contains('motion-off') ? 'instant' : 'smooth'});
 }
 
 /* ================= DAILY LOSS LIMIT ================= */
@@ -2323,22 +2238,22 @@ function renderDailyLimit(){
   bar.style.width = (ratio * 100).toFixed(0) + '%';
   if(todaysLossPct >= limitPct){
     status.className = 'limit-status stop';
-    status.textContent = '🛑 وصلت حد الخسارة اليومي — وقف عن التداول اليوم';
+    status.textContent = ' وصلت حد الخسارة اليومي — وقف عن التداول اليوم';
     bar.style.background = 'var(--red)';
   } else if(ratio >= 0.6){
     status.className = 'limit-status warn';
-    status.textContent = '⚠️ اقتربت من حدك اليومي، خلّك حذر';
+    status.textContent = ' اقتربت من حدك اليومي، خلّك حذر';
     bar.style.background = 'var(--amber)';
   } else {
     status.className = 'limit-status ok';
-    status.textContent = '✅ لسا ضمن حدك اليومي';
+    status.textContent = ' لسا ضمن حدك اليومي';
     bar.style.background = 'var(--green)';
   }
   sub.textContent = `خسرت اليوم ${todaysLossPct.toFixed(2)}% من رأس مالك، من أصل حد ${limitPct}%`;
 
   const list = document.getElementById('limitTradesList');
   if(todaysLosses.length === 0){
-    list.innerHTML = `<div class="price-loading">ما في صفقات خاسرة اليوم — تمام 👍</div>`;
+    list.innerHTML = `<div class="price-loading">ما في صفقات خاسرة اليوم — تمام </div>`;
   } else {
     list.innerHTML = todaysLosses.map(j => `<div class="upcoming-item">
       <div><div class="upcoming-name">${j.instrument || (j.assetType === 'crypto' ? 'كريبتو' : 'فوركس')}</div>
@@ -2448,7 +2363,7 @@ function renderEquityCurve(trades){
   const stepX = points.length > 1 ? (W - padX*2) / (points.length - 1) : 0;
   const yAt = (v)=> H - padY - ((v - minV) / range) * (H - padY*2);
 
-  ctx.strokeStyle = 'rgba(34,211,238,0.18)'; ctx.lineWidth = 1;
+  ctx.strokeStyle = 'rgba(196,237,152,0.18)'; ctx.lineWidth = 1;
   ctx.beginPath(); ctx.moveTo(padX, yAt(100)); ctx.lineTo(W-padX, yAt(100)); ctx.stroke();
 
   const lineColor = points[points.length-1] >= 100 ? '#34d399' : '#ff5c7a';
@@ -2482,7 +2397,7 @@ function exportJournal(){
   a.download = `the-op-journal-${new Date().toISOString().slice(0,10)}.json`;
   a.click();
   URL.revokeObjectURL(url);
-  showToastCalc('✅ اتصدّر ملف السجل');
+  showToastCalc(' اتصدّر ملف السجل');
 }
 
 function importJournalFile(file){
@@ -2498,51 +2413,14 @@ function importJournalFile(file){
       persistJournal();
       renderJournal();
       renderReport();
-      showToastCalc(`✅ استوردنا ${merged.length} صفقة جديدة`);
+      showToastCalc(` استوردنا ${merged.length} صفقة جديدة`);
     }catch(e){
-      showToastCalc('⚠️ ملف غير صالح — تأكد انه ملف تصدير من THE OP');
+      showToastCalc(' ملف غير صالح — تأكد انه ملف تصدير من THE OP');
     }
   };
   reader.readAsText(file);
   document.getElementById('journalImportInput').value = '';
 }
-
-/* ================= LANDING SPLASH ================= */
-function buildLandingTitle(){
-  const text = 'THE OP';
-  const el = document.getElementById('landingTitle');
-  el.innerHTML = text.split('').map((ch, i)=>{
-    const display = ch === ' ' ? '&nbsp;' : ch;
-    return `<span class="landing-letter" style="animation-delay:${i * 0.07}s">${display}</span>`;
-  }).join('');
-}
-buildLandingTitle();
-
-function buildFloatingArrows(){
-  const container = document.getElementById('floatArrows');
-  const count = 22;
-  let html = '';
-  for(let i = 0; i < count; i++){
-    const isUp = Math.random() > 0.5;
-    const left = Math.random() * 100;
-    const size = 14 + Math.random() * 20;
-    const duration = 8 + Math.random() * 10;
-    const delay = Math.random() * 10;
-    html += `<span class="float-arrow ${isUp ? 'up' : 'down'}" style="left:${left}%; font-size:${size}px; animation-duration:${duration}s; animation-delay:${delay}s;">${isUp ? '▲' : '▼'}</span>`;
-  }
-  container.innerHTML = html;
-}
-buildFloatingArrows();
-
-function enterLanding(){
-  const landing = document.getElementById('landing');
-  landing.classList.add('hidden');
-  setTimeout(()=>{ landing.style.display = 'none'; }, 650);
-}
-document.getElementById('landing').addEventListener('click', (e)=>{
-  if(e.target.id === 'landing' || e.target.id === 'floatArrows') enterLanding();
-});
-setTimeout(enterLanding, 12000);
 
 /* الموقع صار ويب سايت عادي مش تطبيق PWA —
    منشيل أي Service Worker قديم متسجّل من نسخة سابقة عشان ما يخدم محتوى مخزّن قديم. */
@@ -2556,344 +2434,14 @@ if('serviceWorker' in navigator){
 }
 </script><div class="img-modal" id="imgModal" onclick="if(event.target.id==='imgModal') closeImgModal();">
   <div class="img-modal-inner">
-    <button class="img-modal-close" onclick="closeImgModal()">✕</button>
+    <button class="img-modal-close" onclick="closeImgModal()"></button>
     <img id="shareCardImg" alt="بطاقة الصفقة">
-    <div class="img-modal-hint">📥 اضغط ضغطة مطوّلة على الصورة فوق واختار "حفظ الصورة" لتنزيلها على جوالك</div>
+    <div class="img-modal-hint"> اضغط ضغطة مطوّلة على الصورة فوق واختار "حفظ الصورة" لتنزيلها على جوالك</div>
     <a id="shareCardDownload" class="btn" style="display:block; text-align:center; margin-top:12px;" download="the-op-trade-card.png">⬇ تنزيل مباشر (كمبيوتر)</a>
   </div>
 </div>
 
-<script>
-/* ================= خلفية ثلاثية الأبعاد تفاعلية =================
-   ممر شموع يابانية 3D + شبكة أرضية + جزيئات، بيطير للأمام وبيتفاعل مع الماوس/اللمس.
-   مكتوبة بـ WebGL خام — بدون أي مكتبة خارجية، عشان الموقع يضل ملف واحد بلا تبعيات. */
-(function(){
-  var canvas = document.getElementById('bg3d');
-  if(!canvas) return;
-
-  var gl = null;
-  try{
-    gl = canvas.getContext('webgl', { alpha:true, antialias:true, depth:true })
-      || canvas.getContext('experimental-webgl');
-  }catch(e){ gl = null; }
-  if(!gl) return; // ما في WebGL؟ منضل عالخلفية المتدرجة العادية
-
-  var reduceMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-
-  /* ---------------- Shaders ---------------- */
-  var VS = [
-    'attribute vec3 aPos;','attribute vec3 aCol;','attribute float aA;',
-    'uniform mat4 uProj;','uniform mat4 uView;',
-    'uniform float uScroll;','uniform float uWrap;','uniform float uNear;','uniform float uPS;',
-    'varying vec3 vCol;','varying float vFade;',
-    'void main(){',
-    '  vec3 p = aPos;',
-    '  float z = p.z + uScroll;',
-    '  if(uWrap > 0.0){ z = mod(z, uWrap) - uWrap + uNear; }',
-    '  p.z = z;',
-    '  vec4 eye = uView * vec4(p, 1.0);',
-    '  gl_Position = uProj * eye;',
-    '  gl_PointSize = uPS;',
-    '  float d = -eye.z;',
-    '  float fadeFar  = 1.0 - smoothstep(30.0, 80.0, d);',
-    '  float fadeNear = smoothstep(0.6, 5.0, d);',
-    '  vFade = fadeFar * fadeNear * aA;',
-    '  vCol = aCol;',
-    '}'
-  ].join('\n');
-
-  var FS = [
-    'precision mediump float;',
-    'uniform float uPoint;',
-    'varying vec3 vCol;','varying float vFade;',
-    'void main(){',
-    '  float a = vFade;',
-    '  if(uPoint > 0.5){',
-    '    float d = length(gl_PointCoord - vec2(0.5));',
-    '    if(d > 0.5) discard;',
-    '    a *= smoothstep(0.5, 0.0, d);',
-    '  }',
-    '  if(a <= 0.004) discard;',
-    '  gl_FragColor = vec4(vCol, a);',
-    '}'
-  ].join('\n');
-
-  function compile(type, src){
-    var s = gl.createShader(type);
-    gl.shaderSource(s, src); gl.compileShader(s);
-    if(!gl.getShaderParameter(s, gl.COMPILE_STATUS)) return null;
-    return s;
-  }
-  var vs = compile(gl.VERTEX_SHADER, VS), fs = compile(gl.FRAGMENT_SHADER, FS);
-  if(!vs || !fs) return;
-  var prog = gl.createProgram();
-  gl.attachShader(prog, vs); gl.attachShader(prog, fs); gl.linkProgram(prog);
-  if(!gl.getProgramParameter(prog, gl.LINK_STATUS)) return;
-  gl.useProgram(prog);
-
-  var A_POS = gl.getAttribLocation(prog, 'aPos'),
-      A_COL = gl.getAttribLocation(prog, 'aCol'),
-      A_A   = gl.getAttribLocation(prog, 'aA');
-  var U = {};
-  ['uProj','uView','uScroll','uWrap','uNear','uPS','uPoint'].forEach(function(n){
-    U[n] = gl.getUniformLocation(prog, n);
-  });
-
-  /* ---------------- مصفوفات ---------------- */
-  function perspective(out, fovy, aspect, near, far){
-    var f = 1/Math.tan(fovy/2), nf = 1/(near-far);
-    out[0]=f/aspect; out[1]=0; out[2]=0; out[3]=0;
-    out[4]=0; out[5]=f; out[6]=0; out[7]=0;
-    out[8]=0; out[9]=0; out[10]=(far+near)*nf; out[11]=-1;
-    out[12]=0; out[13]=0; out[14]=2*far*near*nf; out[15]=0;
-    return out;
-  }
-  function lookAt(out, ex,ey,ez, cx,cy,cz){
-    var zx=ex-cx, zy=ey-cy, zz=ez-cz;
-    var zl=Math.sqrt(zx*zx+zy*zy+zz*zz)||1; zx/=zl; zy/=zl; zz/=zl;
-    // x = cross(up, z) مع up = (0,1,0)
-    var xx = zz, xy = 0, xz = -zx;
-    var xl=Math.sqrt(xx*xx+xy*xy+xz*xz)||1; xx/=xl; xy/=xl; xz/=xl;
-    var yx=zy*xz-zz*xy, yy=zz*xx-zx*xz, yz=zx*xy-zy*xx;
-    out[0]=xx; out[1]=yx; out[2]=zx; out[3]=0;
-    out[4]=xy; out[5]=yy; out[6]=zy; out[7]=0;
-    out[8]=xz; out[9]=yz; out[10]=zz; out[11]=0;
-    out[12]=-(xx*ex+xy*ey+xz*ez);
-    out[13]=-(yx*ex+yy*ey+yz*ez);
-    out[14]=-(zx*ex+zy*ey+zz*ez);
-    out[15]=1;
-    return out;
-  }
-  var mProj = new Float32Array(16), mView = new Float32Array(16);
-
-  /* ---------------- هندسة الصندوق ---------------- */
-  var FACE_SHADE = [1.0, 0.52, 0.70, 0.88, 1.18, 0.46]; // أمام/خلف/يسار/يمين/فوق/تحت
-  function pushBox(out, cx, y0, y1, cz, w, d, r, g, b, alpha){
-    var x0=cx-w/2, x1=cx+w/2, z0=cz-d/2, z1=cz+d/2;
-    var v = [
-      x0,y0,z1, x1,y0,z1, x1,y1,z1,  x0,y0,z1, x1,y1,z1, x0,y1,z1,
-      x1,y0,z0, x0,y0,z0, x0,y1,z0,  x1,y0,z0, x0,y1,z0, x1,y1,z0,
-      x0,y0,z0, x0,y0,z1, x0,y1,z1,  x0,y0,z0, x0,y1,z1, x0,y1,z0,
-      x1,y0,z1, x1,y0,z0, x1,y1,z0,  x1,y0,z1, x1,y1,z0, x1,y1,z1,
-      x0,y1,z1, x1,y1,z1, x1,y1,z0,  x0,y1,z1, x1,y1,z0, x0,y1,z0,
-      x0,y0,z0, x1,y0,z0, x1,y0,z1,  x0,y0,z0, x1,y0,z1, x0,y0,z1
-    ];
-    for(var i=0, vi=0; i<36; i++, vi+=3){
-      var sh = FACE_SHADE[(i/6)|0];
-      out.push(v[vi], v[vi+1], v[vi+2], r*sh, g*sh, b*sh, alpha);
-    }
-  }
-
-  /* ---------------- الشموع ---------------- */
-  // عالجوال منخفف المشهد: شموع وجزيئات أقل ودقة أقل — يضل حلو بس ما ياكل بطارية ولا يبطّئ
-  var isSmall = Math.min(window.innerWidth, window.innerHeight) < 700
-             || /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '');
-  var DPR_CAP = isSmall ? 1.3 : 1.75;
-
-  var N = isSmall ? 26 : 44, SPACING = 1.5, SPAN = N * SPACING;
-  var VERTS_PER_CANDLE = 72, FLOATS_PER_CANDLE = VERTS_PER_CANDLE * 7;
-  var ROWS = [ {x:-1.5, alpha:1.0, price:1.5}, {x:2.7, alpha:0.44, price:1.2} ];
-  var candles = [];
-
-  function nextOHLC(row){
-    var o = row.price;
-    var c = o + (Math.random()-0.47) * 0.46;
-    if(c < 0.42) c = 0.42 + Math.random()*0.25;
-    if(c > 3.3)  c = 3.3  - Math.random()*0.25;
-    var hi = Math.max(o,c) + Math.random()*0.24;
-    var lo = Math.min(o,c) - Math.random()*0.24;
-    if(lo < 0.10) lo = 0.10;
-    row.price = c;
-    return {o:o, c:c, h:hi, l:lo};
-  }
-
-  var candleData = new Float32Array(ROWS.length * N * FLOATS_PER_CANDLE);
-  var scratch = [];
-
-  function writeCandle(idx){
-    var cd = candles[idx];
-    scratch.length = 0;
-    var bull = cd.c >= cd.o;
-    var r = bull ? 0.16 : 1.00, g = bull ? 0.86 : 0.36, b = bull ? 0.70 : 0.48;
-    var y0 = Math.min(cd.o, cd.c), y1 = Math.max(cd.o, cd.c);
-    if(y1 - y0 < 0.075) y1 = y0 + 0.075;
-    pushBox(scratch, cd.x, y0, y1, cd.z, 0.80, 0.80, r, g, b, cd.alpha);
-    pushBox(scratch, cd.x, cd.l, cd.h, cd.z, 0.12, 0.12, r, g, b, cd.alpha * 0.9);
-    candleData.set(scratch, idx * FLOATS_PER_CANDLE);
-  }
-
-  for(var ri=0; ri<ROWS.length; ri++){
-    for(var i=0; i<N; i++){
-      var row = ROWS[ri], o = nextOHLC(row);
-      candles.push({ x:row.x, z:-i*SPACING, alpha:row.alpha, row:ri, o:o.o, c:o.c, h:o.h, l:o.l });
-      writeCandle(candles.length-1);
-    }
-  }
-
-  var candleBuf = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, candleBuf);
-  gl.bufferData(gl.ARRAY_BUFFER, candleData, gl.DYNAMIC_DRAW);
-
-  /* ---------------- الشبكة والجزيئات ---------------- */
-  var GRID_STEP = 2.2, GRID_LINES = 32, GRID_WRAP = GRID_STEP * GRID_LINES, GRID_NEAR = 7.0;
-  var gridArr = [];
-  for(var k=0; k<GRID_LINES; k++){
-    var gz = -k*GRID_STEP, fade = 0.46;
-    gridArr.push(-17,0,gz, 0.13,0.83,0.93, fade);
-    gridArr.push( 17,0,gz, 0.13,0.83,0.93, fade);
-  }
-  var gridBuf = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, gridBuf);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(gridArr), gl.STATIC_DRAW);
-  var gridCount = gridArr.length/7;
-
-  var railArr = [];
-  for(var xk=-7; xk<=7; xk++){
-    var rx = xk*2.4, a = 0.24;
-    railArr.push(rx,0,GRID_NEAR, 0.13,0.83,0.93, a);
-    railArr.push(rx,0,GRID_NEAR-GRID_WRAP, 0.13,0.83,0.93, 0.0);
-  }
-  var railBuf = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, railBuf);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(railArr), gl.STATIC_DRAW);
-  var railCount = railArr.length/7;
-
-  var PCOUNT = isSmall ? 110 : 230, pArr = [];
-  for(var p=0; p<PCOUNT; p++){
-    var t = Math.random();
-    // سماوي غالباً، مع رشّة بنفسجي/وردي وأخضر — نفس لوحة الواجهة
-    var pr = t<0.58 ? 0.13 : (t<0.80 ? 1.00 : 0.16),
-        pg = t<0.58 ? 0.83 : (t<0.80 ? 0.31 : 0.86),
-        pb = t<0.58 ? 0.93 : (t<0.80 ? 0.85 : 0.70);
-    pArr.push(
-      (Math.random()-0.5)*30, Math.random()*9 + 0.3, -Math.random()*GRID_WRAP,
-      pr, pg, pb, 0.15 + Math.random()*0.4
-    );
-  }
-  var partBuf = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, partBuf);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(pArr), gl.STATIC_DRAW);
-
-  /* ---------------- الرسم ---------------- */
-  function bindAttribs(){
-    gl.vertexAttribPointer(A_POS, 3, gl.FLOAT, false, 28, 0);  gl.enableVertexAttribArray(A_POS);
-    gl.vertexAttribPointer(A_COL, 3, gl.FLOAT, false, 28, 12); gl.enableVertexAttribArray(A_COL);
-    gl.vertexAttribPointer(A_A,   1, gl.FLOAT, false, 28, 24); gl.enableVertexAttribArray(A_A);
-  }
-
-  function resize(){
-    var dpr = Math.min(window.devicePixelRatio || 1, DPR_CAP);
-    var w = Math.max(1, Math.floor(canvas.clientWidth  * dpr));
-    var h = Math.max(1, Math.floor(canvas.clientHeight * dpr));
-    if(canvas.width !== w || canvas.height !== h){ canvas.width = w; canvas.height = h; }
-    gl.viewport(0, 0, canvas.width, canvas.height);
-  }
-
-  var scroll = 0, mx = 0, my = 0, tmx = 0, tmy = 0, boost = 0, last = 0, rafId = 0, shown = false;
-
-  function frame(now){
-    rafId = requestAnimationFrame(frame);
-    var dt = last ? Math.min((now - last)/1000, 0.05) : 0.016;
-    last = now;
-
-    mx += (tmx - mx) * 0.045;
-    my += (tmy - my) * 0.045;
-    boost *= 0.94;
-
-    if(!reduceMotion) scroll += (3.1 + boost * 5.0) * dt;
-
-    // إعادة تدوير الشموع يلي عدّت الكاميرا
-    for(var i=0; i<candles.length; i++){
-      if(candles[i].z + scroll > 9.0){
-        var cd = candles[i];
-        cd.z -= SPAN;
-        var o = nextOHLC(ROWS[cd.row]);
-        cd.o=o.o; cd.c=o.c; cd.h=o.h; cd.l=o.l;
-        writeCandle(i);
-        gl.bindBuffer(gl.ARRAY_BUFFER, candleBuf);
-        gl.bufferSubData(gl.ARRAY_BUFFER, i*FLOATS_PER_CANDLE*4,
-          candleData.subarray(i*FLOATS_PER_CANDLE, (i+1)*FLOATS_PER_CANDLE));
-      }
-    }
-
-    resize();
-    var aspect = canvas.width / canvas.height;
-    perspective(mProj, 55*Math.PI/180, aspect, 0.1, 120);
-    lookAt(mView,
-      0.4 + mx*2.0,  2.25 - my*1.0,  6.6,
-      0.2 + mx*0.7,  1.25 - my*0.4, -18.0);
-
-    gl.clearColor(0,0,0,0);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    gl.enable(gl.DEPTH_TEST);
-    gl.enable(gl.BLEND);
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-
-    gl.uniformMatrix4fv(U.uProj, false, mProj);
-    gl.uniformMatrix4fv(U.uView, false, mView);
-    gl.uniform1f(U.uPoint, 0);
-    gl.uniform1f(U.uPS, 1);
-
-    // الشموع
-    gl.depthMask(true);
-    gl.uniform1f(U.uScroll, scroll);
-    gl.uniform1f(U.uWrap, 0);
-    gl.uniform1f(U.uNear, 0);
-    gl.bindBuffer(gl.ARRAY_BUFFER, candleBuf); bindAttribs();
-    gl.drawArrays(gl.TRIANGLES, 0, candles.length * VERTS_PER_CANDLE);
-
-    // الشبكة + الجزيئات (إضافية، بدون كتابة عمق)
-    gl.depthMask(false);
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
-
-    gl.uniform1f(U.uWrap, GRID_WRAP);
-    gl.uniform1f(U.uNear, GRID_NEAR);
-    gl.bindBuffer(gl.ARRAY_BUFFER, gridBuf); bindAttribs();
-    gl.drawArrays(gl.LINES, 0, gridCount);
-
-    gl.uniform1f(U.uScroll, 0);
-    gl.uniform1f(U.uWrap, 0);
-    gl.bindBuffer(gl.ARRAY_BUFFER, railBuf); bindAttribs();
-    gl.drawArrays(gl.LINES, 0, railCount);
-
-    gl.uniform1f(U.uScroll, scroll * 0.35);
-    gl.uniform1f(U.uWrap, GRID_WRAP);
-    gl.uniform1f(U.uNear, GRID_NEAR);
-    gl.uniform1f(U.uPoint, 1);
-    gl.uniform1f(U.uPS, Math.min(3.2 * (window.devicePixelRatio||1), 6));
-    gl.bindBuffer(gl.ARRAY_BUFFER, partBuf); bindAttribs();
-    gl.drawArrays(gl.POINTS, 0, PCOUNT);
-
-    gl.depthMask(true);
-
-    if(!shown){ shown = true; canvas.classList.add('ready'); }
-  }
-
-  /* ---------------- تفاعل ---------------- */
-  window.addEventListener('mousemove', function(e){
-    tmx = (e.clientX / window.innerWidth) * 2 - 1;
-    tmy = (e.clientY / window.innerHeight) * 2 - 1;
-    if(boost < 0.35) boost += 0.03;
-  }, {passive:true});
-
-  window.addEventListener('touchmove', function(e){
-    if(!e.touches || !e.touches[0]) return;
-    tmx = (e.touches[0].clientX / window.innerWidth) * 2 - 1;
-    tmy = (e.touches[0].clientY / window.innerHeight) * 2 - 1;
-  }, {passive:true});
-
-  window.addEventListener('click', function(){ boost = 1.6; }, {passive:true});
-  window.addEventListener('resize', resize, {passive:true});
-
-  document.addEventListener('visibilitychange', function(){
-    if(document.hidden){ cancelAnimationFrame(rafId); rafId = 0; }
-    else if(!rafId){ last = 0; rafId = requestAnimationFrame(frame); }
-  });
-
-  resize();
-  rafId = requestAnimationFrame(frame);
-})();
-</script>
+<script src="./experience.js" defer></script>
 
 </body>
 </html>

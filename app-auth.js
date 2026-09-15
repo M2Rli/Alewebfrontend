@@ -50,23 +50,22 @@ function mountBar() {
   const bar = document.createElement('div');
   bar.id = 'accountBar';
   bar.dir = 'rtl';
-  bar.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;'
-    + 'display:flex;gap:10px;align-items:center;justify-content:flex-start;flex-wrap:wrap;'
-    + 'padding:8px 14px;background:rgba(8,14,20,.92);backdrop-filter:blur(8px);'
-    + 'border-bottom:1px solid rgba(0,229,255,.18);font-size:13px;color:#cfe9f2';
-  document.body.prepend(bar);
-  document.body.style.paddingTop = '48px';
+  bar.setAttribute('aria-label', 'حسابك واشتراكك');
+  const slot = el('accountSlot');
+  if (slot) slot.append(bar);
+  else document.body.prepend(bar);
   return bar;
 }
 
 function btn(label, onClick, primary = false) {
   const b = document.createElement('button');
   b.type = 'button';
+  b.dataset.primary = String(primary);
   b.textContent = label;
   b.style.cssText = 'cursor:pointer;border-radius:8px;padding:6px 12px;font:inherit;'
     + (primary
-      ? 'background:linear-gradient(90deg,#00e5ff,#0091ea);color:#04121a;border:0;font-weight:700'
-      : 'background:transparent;color:#9fd6e6;border:1px solid rgba(0,229,255,.35)');
+      ? 'background:#c4ed98;color:#192913;border:0;font-weight:700'
+      : 'background:transparent;color:#bdcbb9;border:1px solid rgba(196,237,152,.25)');
   b.onclick = onClick;
   return b;
 }
@@ -83,7 +82,9 @@ function render() {
   bar.textContent = '';
 
   if (!account?.profile) {
-    bar.append(span('غير مسجّل دخول'), btn('تسجيل الدخول', openAuthDialog, true));
+    const label = span('غير مسجّل دخول');
+    label.className = 'signed-out-label';
+    bar.append(label, btn('تسجيل الدخول', openAuthDialog, true));
     return;
   }
 
@@ -110,7 +111,10 @@ function render() {
  * ------------------------------------------------------------------ */
 
 function openModal(title) {
-  el('appModal')?.remove();
+  const existingModal = el('appModal');
+  if (existingModal?.closeDialog) existingModal.closeDialog();
+  else existingModal?.remove();
+  const previousFocus = document.activeElement;
   const wrap = document.createElement('div');
   wrap.id = 'appModal';
   wrap.style.cssText = 'position:fixed;inset:0;z-index:10000;display:flex;'
@@ -123,12 +127,44 @@ function openModal(title) {
     + 'border-radius:16px;padding:22px;max-width:560px;width:100%;max-height:86vh;'
     + 'overflow:auto;color:#dcf1f8';
   const h = document.createElement('h3');
+  h.id = 'appModalTitle';
   h.textContent = title;
   h.style.cssText = 'margin:0 0 14px;color:#00e5ff';
-  card.append(h);
+  card.setAttribute('role', 'dialog');
+  card.setAttribute('aria-modal', 'true');
+  card.setAttribute('aria-labelledby', h.id);
+  const close = btn('×', () => wrap.remove());
+  close.className = 'modal-close';
+  close.setAttribute('aria-label', 'إغلاق النافذة');
+  card.append(close, h);
 
   wrap.append(card);
   document.body.append(wrap);
+  const previousOverflow = document.body.style.overflow;
+  document.body.style.overflow = 'hidden';
+  const controller = new AbortController();
+  let cleanedUp = false;
+  const cleanUp = () => {
+    if (cleanedUp) return;
+    cleanedUp = true;
+    controller.abort(); observer.disconnect();
+    document.body.style.overflow = previousOverflow;
+    if (!el('appModal')) previousFocus?.focus();
+  };
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') { event.preventDefault(); wrap.remove(); }
+    if (event.key !== 'Tab') return;
+    const targets = [...card.querySelectorAll('button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), a[href]')].filter(node => node.getClientRects().length);
+    const first = targets[0], last = targets[targets.length - 1];
+    if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+    else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+  }, { signal: controller.signal });
+  const observer = new MutationObserver(() => {
+    if (!wrap.isConnected) cleanUp();
+  });
+  wrap.closeDialog = () => { wrap.remove(); cleanUp(); };
+  observer.observe(document.body, { childList: true });
+  requestAnimationFrame(() => { if (wrap.isConnected) (card.querySelector('input') || close).focus(); });
   return { wrap, card };
 }
 
@@ -157,9 +193,11 @@ function openAuthDialog() {
   form.style.cssText = 'display:flex;flex-direction:column;gap:10px';
 
   const email = Object.assign(document.createElement('input'),
-    { type: 'email', required: true, placeholder: 'البريد الإلكتروني' });
+    { type: 'email', required: true, placeholder: 'البريد الإلكتروني', autocomplete: 'email' });
   const password = Object.assign(document.createElement('input'),
-    { type: 'password', required: true, minLength: 8, placeholder: 'كلمة السر (٨ خانات على الأقل)' });
+    { type: 'password', required: true, minLength: 8, placeholder: 'كلمة السر (٨ خانات على الأقل)', autocomplete: 'current-password' });
+  email.setAttribute('aria-label', 'البريد الإلكتروني');
+  password.setAttribute('aria-label', 'كلمة السر');
   email.style.cssText = field;
   password.style.cssText = field;
 
