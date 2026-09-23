@@ -64,8 +64,8 @@ function btn(label, onClick, primary = false) {
   b.textContent = label;
   b.style.cssText = 'cursor:pointer;border-radius:8px;padding:6px 12px;font:inherit;'
     + (primary
-      ? 'background:#c4ed98;color:#192913;border:0;font-weight:700'
-      : 'background:transparent;color:#bdcbb9;border:1px solid rgba(196,237,152,.25)');
+      ? 'background:var(--purple-bright,#a8dfc6);color:#192913;border:0;font-weight:700'
+      : 'background:transparent;color:var(--text,#e8efef);border:1px solid var(--border-strong,rgba(168,223,198,.25))');
   b.onclick = onClick;
   return b;
 }

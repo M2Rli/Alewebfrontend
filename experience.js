@@ -9,6 +9,7 @@
   let userPaused = false;
   let frame = 0;
   let pointer = { x: 0, y: 0 };
+  let stageVisible = false;
   try { userPaused = localStorage.getItem('the-op-motion') === 'off'; } catch (_) {}
 
   function updateMotion() {
@@ -43,14 +44,29 @@
     pointer = { x: 0, y: 0 };
     if (!frame) frame = requestAnimationFrame(drawTilt);
   });
+  function syncVisibility() {
+    root.classList.toggle('document-idle', document.hidden);
+    stage.classList.toggle('scene-idle', !stageVisible || document.hidden);
+  }
   const visibility = new IntersectionObserver(([entry]) => {
-    object.style.animationPlayState = entry.isIntersecting && !document.hidden ? 'running' : 'paused';
+    stageVisible = entry.isIntersecting;
+    syncVisibility();
   }, { threshold: 0.1 });
   visibility.observe(stage);
   document.addEventListener('visibilitychange', () => {
-    object.style.animationPlayState = document.hidden ? 'paused' : 'running';
+    syncVisibility();
     if (document.hidden && frame) { cancelAnimationFrame(frame); frame = 0; }
   });
+
+  // Reveal on arrival without hiding content if JavaScript or observers fail.
+  const reveals = new IntersectionObserver((entries, observer) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('is-revealed');
+      observer.unobserve(entry.target);
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.op-reveal').forEach((card) => reveals.observe(card));
 
   const clock = document.getElementById('workspaceTime');
   function updateClock() {
