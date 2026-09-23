@@ -5,28 +5,30 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <title>لوحة التحكم — THE OP</title>
+<link rel="stylesheet" href="./assets/fonts/fonts.css">
 <script src="./config.js"></script>
 <style>
+  :focus-visible{outline:2px solid #c4ed98;outline-offset:3px}
   :root{
-    --bg:#050c12; --panel:#0b1620; --line:rgba(0,229,255,.18);
-    --cyan:#00e5ff; --text:#dcf1f8; --dim:#7fa3b3;
+    --bg:#0c100f; --panel:#151e17; --line:rgba(196,237,152,.18);
+    --cyan:#c4ed98; --text:#e9ede7; --dim:#a0aaa1;
     --green:#28e0a0; --red:#ff5c7a; --amber:#ffb648;
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--text);
-    font-family:system-ui,'Segoe UI',Tahoma,sans-serif;font-size:14px}
+    font-family:'Cairo',system-ui,sans-serif;font-size:14px}
   header{display:flex;gap:12px;align-items:center;flex-wrap:wrap;
     padding:14px 18px;border-bottom:1px solid var(--line);
-    background:rgba(8,14,20,.94);position:sticky;top:0;z-index:20}
+    background:rgba(16,21,17,.96);position:sticky;top:0;z-index:20}
   h1{margin:0;font-size:17px;color:var(--cyan)}
   main{padding:18px;max-width:1300px;margin:0 auto}
   button{cursor:pointer;font:inherit;border-radius:8px;padding:7px 13px;
-    background:transparent;color:#9fd6e6;border:1px solid rgba(0,229,255,.35)}
-  button.primary{background:linear-gradient(90deg,#00e5ff,#0091ea);color:#04121a;border:0;font-weight:700}
+    background:transparent;color:#bdcbb9;border:1px solid rgba(196,237,152,.35)}
+  button.primary{background:linear-gradient(90deg,#c4ed98,#9abc7b);color:#04121a;border:0;font-weight:700}
   button.danger{border-color:rgba(255,92,122,.5);color:#ffa9b8}
   button:disabled{opacity:.5;cursor:not-allowed}
   .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
-  .tabs button[aria-selected="true"]{background:rgba(0,229,255,.12);border-color:var(--cyan);color:var(--cyan)}
+  .tabs button[aria-selected="true"]{background:rgba(196,237,152,.12);border-color:var(--cyan);color:var(--cyan)}
   .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:12px;margin-bottom:22px}
   .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}
   .card .label{font-size:12px;color:var(--dim)}
@@ -38,9 +40,9 @@
   section h2{margin:0 0 12px;font-size:15px;color:var(--cyan)}
   .scroll{overflow-x:auto}
   table{width:100%;border-collapse:collapse;font-size:13px;white-space:nowrap}
-  th,td{padding:9px 10px;text-align:right;border-bottom:1px solid rgba(0,229,255,.10)}
+  th,td{padding:9px 10px;text-align:right;border-bottom:1px solid rgba(196,237,152,.10)}
   th{color:var(--dim);font-weight:600;font-size:12px}
-  tbody tr:hover{background:rgba(0,229,255,.04)}
+  tbody tr:hover{background:rgba(196,237,152,.04)}
   code{direction:ltr;display:inline-block;font-size:12px}
   .num{direction:ltr;text-align:left;font-variant-numeric:tabular-nums}
   .pill{padding:2px 8px;border-radius:99px;font-size:11.5px;border:1px solid}
@@ -49,12 +51,12 @@
   .pill.wait{color:var(--amber);border-color:rgba(255,182,72,.4)}
   .pill.none{color:var(--dim);border-color:rgba(127,163,179,.35)}
   .bars{display:flex;align-items:flex-end;gap:3px;height:90px;margin-top:8px}
-  .bars div{flex:1;background:linear-gradient(180deg,var(--cyan),rgba(0,229,255,.25));
+  .bars div{flex:1;background:linear-gradient(180deg,var(--cyan),rgba(196,237,152,.25));
     border-radius:3px 3px 0 0;min-height:2px}
   .muted{color:var(--dim);font-size:12.5px}
   .gate{max-width:420px;margin:16vh auto;text-align:center}
   input,textarea{width:100%;padding:9px;border-radius:8px;border:1px solid var(--line);
-    background:#07131b;color:var(--text);font:inherit}
+    background:#101712;color:var(--text);font:inherit}
   .row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
   label{font-size:12.5px;color:var(--dim)}
   @media(max-width:640px){.row{grid-template-columns:1fr}}
